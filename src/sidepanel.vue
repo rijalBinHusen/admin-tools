@@ -6,15 +6,22 @@
 </template>
 
 <script lang="ts" setup>
-    function sendAlert() {
-      // @ts-ignore
-      chrome.runtime.sendMessage({ action: 'trigger-content-function' }, res);
-      // chrome.runtime.sendMessage({ action: 'show-alert' }, res);
-    }
+  import { onMounted } from 'vue';
 
-    function res(msg: any) {
-      alert(msg)
-    }
+  function sendAlert() {
+    // @ts-ignore
+    chrome.runtime.sendMessage({ action: 'trigger-content-function' });
+    // chrome.runtime.sendMessage({ action: 'show-alert' }, res);
+  }
+
+  onMounted(() => {
+    // @ts-ignore
+    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+      if (message.action === 'content-response') {
+        alert('Sidepanel received: ' + message.data);
+      }
+    });
+  })
 </script>
 
 <style scoped>
