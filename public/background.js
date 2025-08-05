@@ -12,6 +12,7 @@
 // Handle messages from content script and side panel
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   
+  // trigger from sidepanel
   if (message.action === 'trigger-content-function') {
     // Send message to content script to show hello world
     chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
@@ -44,5 +45,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         }
       }
     });
+  }
+
+  // reply from content.js
+  if (message.action === 'reply-to-sidepanel') {
+    // Send to all side panel views
+    chrome.runtime.sendMessage({ action: 'content-response', data: message.data });
   }
 });
