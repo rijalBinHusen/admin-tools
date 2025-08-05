@@ -32,7 +32,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             // Try sending message again after a short delay
             setTimeout(async () => {
               try {
-                await chrome.tabs.sendMessage(tabs[0].id, {
+                await chrome.tabs.sendMessage(tabs[0].id!, {
                   action: 'runContentFunction'
                 });
               } catch (e) {
