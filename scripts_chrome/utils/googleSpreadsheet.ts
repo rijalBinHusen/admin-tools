@@ -1,3 +1,4 @@
+import { type spreadsheetResponse } from "../scripts_chrome.types";
 
 export class GoogleSpreadsheet {
   
@@ -18,8 +19,9 @@ export class GoogleSpreadsheet {
       // console.log("Access Token:", token);
 
       // Example: Call Google Sheets API
+      // "https://sheets.googleapis.com/v4/spreadsheets/1SGLxZ5-h9v6aK-ViiUuGwnYakoutackE2QKO-IvBPwY/values/Projects!A2:B2",
       const response = await fetch(
-        "https://sheets.googleapis.com/v4/spreadsheets/1SGLxZ5-h9v6aK-ViiUuGwnYakoutackE2QKO-IvBPwY/values/Projects1!A2:B2",
+        process.env.VITE_SPREADSHEET_TO_ACCESS || "",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -27,6 +29,7 @@ export class GoogleSpreadsheet {
         }
       );
       const data = await response.json();
+      console.log(data)
       return {
         isSuccess: true,
         data: JSON.stringify(data)

@@ -14,7 +14,6 @@ export type sidepanelCommunication = "stb-run-hello-world"
                                 |"bts-run-hello-world"
                                 |"stb-get-spreadsheet-data"
                                 |"btc-get-spreadsheet-data"
-                                |"ctb-get-spreadsheet-data"
                                 |"bts-get-spreadsheet-data"
 
 export interface messageCrossScript {

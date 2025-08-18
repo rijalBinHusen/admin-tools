@@ -27,7 +27,8 @@
         alert('Sidepanel received: ' + message.data);
       }
       if(message.action === 'bts-get-spreadsheet-data') {
-
+        
+        alert('Sidepanel received spreadsheet data: ' + message.data);
       }
     });
   })

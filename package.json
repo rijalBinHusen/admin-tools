@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "prebuild": "node scripts/generate_manifest",
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview"
   },

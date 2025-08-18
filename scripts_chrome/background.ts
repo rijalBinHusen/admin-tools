@@ -1,4 +1,5 @@
 import { type messageCrossScript, sidepanelCommunication } from "./scripts_chrome.types";
+import { GoogleSpreadsheet } from "./utils/googleSpreadsheet";
 
 // Handle messages from content script and side panel
 chrome.runtime.onMessage.addListener((message: messageCrossScript, sender, sendResponse) => {
@@ -8,53 +9,21 @@ chrome.runtime.onMessage.addListener((message: messageCrossScript, sender, sendR
   // do switch statement
   switch (message.action) {
     case 'stb-run-hello-world':
-       chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
-      if (tabs[0]?.id) {
-        try {
-          await chrome.tabs.sendMessage(tabs[0].id, {
-            action: 'btc-run-hello-world'
-          });
-        } catch (error) {
-          // If content script not ready, inject it and try again
-          console.log('Content script not ready, injecting...');
-          try {
-            await chrome.scripting.executeScript({
-              target: { tabId: tabs[0].id },
-              files: ['content.js']
-            });
-            // Try sending message again after a short delay
-            setTimeout(async () => {
-              try {
-                await chrome.tabs.sendMessage(tabs[0].id!, {
-                  action: 'btc-run-hello-world'
-                });
-              } catch (e) {
-                console.log('Still unable to connect to content script');
-              }
-            }, 100);
-          } catch (injectError) {
-            console.log('Cannot inject content script:', injectError);
-          }
-        }
-      }
-    });
-    break;
+      forwardActionToContentTS('btc-run-hello-world');
     case 'stb-get-spreadsheet-data':
-      forwardActionToContentTS('btc-get-spreadsheet-data');
-    break;
-    case 'ctb-get-spreadsheet-data':
-      forwardActionToSidePanel(message)
-    break;
+      getSpreadsheetData();
     case 'ctb-run-hello-world':
-      forwardActionToSidePanel(message);
-      break;
+      forwardActionToSidePanel(message)
     default:
       break;
   }
 });
 
 function forwardActionToSidePanel(yourAction: messageCrossScript) {
-  chrome.runtime.sendMessage(yourAction)
+  chrome.runtime.sendMessage({
+    ...yourAction,
+    action: yourAction.action.replace("ctb", "bts")
+  })
 }
 
 function forwardActionToContentTS (yourActionName: sidepanelCommunication) {
@@ -89,4 +58,11 @@ function forwardActionToContentTS (yourActionName: sidepanelCommunication) {
         }
       }
     });
+}
+
+async function getSpreadsheetData() {
+  
+    const sS = new GoogleSpreadsheet();
+    const getData = await sS.getValueOnSpreadsheet();
+    forwardActionToSidePanel({ action: "bts-get-spreadsheet-data", data: getData.data });
 }
