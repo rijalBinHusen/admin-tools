@@ -1,25 +1,40 @@
-
-// chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-//   sendResponse("Message from background.js")
-//   if (message.action === 'trigger-content-function') {
-//     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-//       if (tabs.length === 0) return;
-//       chrome.tabs.sendMessage(tabs[0].id, { action: 'runContentFunction'  }, sendResponse);
-//     });
-//   }
-// });
+import { type messageCrossScript, sidepanelCommunication } from "./scripts_chrome.types";
+import { GoogleSpreadsheet } from "./utils/googleSpreadsheet";
 
 // Handle messages from content script and side panel
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  
+chrome.runtime.onMessage.addListener((message: messageCrossScript, sender, sendResponse) => {
+ 
   // trigger from sidepanel
-  if (message.action === 'trigger-content-function') {
-    // Send message to content script to show hello world
-    chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
+  // Send message to content script to show hello world
+  // do switch statement
+  switch (message.action) {
+    case 'stb-run-hello-world':
+      forwardActionToContentTS('btc-run-hello-world');
+      break;
+    case 'stb-get-spreadsheet-data':
+      getSpreadsheetData(message.data);
+      break;
+    case 'ctb-run-hello-world':
+      forwardActionToSidePanel(message)
+    default:
+      break;
+  }
+});
+
+function forwardActionToSidePanel(yourAction: messageCrossScript) {
+  chrome.runtime.sendMessage({
+    ...yourAction,
+    action: yourAction.action.replace("ctb", "bts")
+  })
+}
+
+function forwardActionToContentTS (yourActionName: sidepanelCommunication) {
+  
+  chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
       if (tabs[0]?.id) {
         try {
           await chrome.tabs.sendMessage(tabs[0].id, {
-            action: 'runContentFunction'
+            action: yourActionName
           });
         } catch (error) {
           // If content script not ready, inject it and try again
@@ -33,7 +48,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             setTimeout(async () => {
               try {
                 await chrome.tabs.sendMessage(tabs[0].id!, {
-                  action: 'runContentFunction'
+                  action: yourActionName
                 });
               } catch (e) {
                 console.log('Still unable to connect to content script');
@@ -45,11 +60,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         }
       }
     });
-  }
+}
 
-  // reply from content.js
-  if (message.action === 'reply-to-sidepanel') {
-    // Send to all side panel views
-    chrome.runtime.sendMessage({ action: 'content-response', data: message.data });
-  }
-});
+async function getSpreadsheetData(url: string) {
+
+    let message = "Spreadsheet URL invalid" + url;
+
+    // if url valid, get data on spreadsheet, and overwrite message above
+    if(url) {
+
+      const sS = new GoogleSpreadsheet();
+      const getData = await sS.getValueOnSpreadsheet(url);
+      message = getData.data
+    }
+      
+    forwardActionToSidePanel({ action: "bts-get-spreadsheet-data", data: message });
+}

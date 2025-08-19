@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "postbuild": "node scripts/generate-manifest",
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview"
   },
@@ -14,7 +15,11 @@
     "vue": "^3.5.17"
   },
   "devDependencies": {
+<<<<<<< HEAD
     "@types/node": "^24.2.0",
+=======
+    "@types/node": "^24.3.0",
+>>>>>>> feat-google-account-access
     "@vitejs/plugin-vue": "^6.0.0",
     "@vue/tsconfig": "^0.7.0",
     "typescript": "~5.8.3",
