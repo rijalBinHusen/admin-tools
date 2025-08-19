@@ -10,8 +10,10 @@ chrome.runtime.onMessage.addListener((message: messageCrossScript, sender, sendR
   switch (message.action) {
     case 'stb-run-hello-world':
       forwardActionToContentTS('btc-run-hello-world');
+      break;
     case 'stb-get-spreadsheet-data':
-      getSpreadsheetData();
+      getSpreadsheetData(message.data);
+      break;
     case 'ctb-run-hello-world':
       forwardActionToSidePanel(message)
     default:
@@ -60,9 +62,17 @@ function forwardActionToContentTS (yourActionName: sidepanelCommunication) {
     });
 }
 
-async function getSpreadsheetData() {
-  
-    const sS = new GoogleSpreadsheet();
-    const getData = await sS.getValueOnSpreadsheet();
-    forwardActionToSidePanel({ action: "bts-get-spreadsheet-data", data: getData.data });
+async function getSpreadsheetData(url: string) {
+
+    let message = "Spreadsheet URL invalid" + url;
+
+    // if url valid, get data on spreadsheet, and overwrite message above
+    if(url) {
+
+      const sS = new GoogleSpreadsheet();
+      const getData = await sS.getValueOnSpreadsheet(url);
+      message = getData.data
+    }
+      
+    forwardActionToSidePanel({ action: "bts-get-spreadsheet-data", data: message });
 }

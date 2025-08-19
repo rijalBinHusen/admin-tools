@@ -1,23 +1,22 @@
 <template>
   <div>
     <h2>Vue Side Panel</h2>
-    <button @click="sendAction">Send Alert to Main Page!</button>
-    <button @click="sendAction2">Get spreadsheet data</button>
+    <button @click="sendActionToChrome('stb-run-hello-world')">Send Alert to Main Page!</button>
+    <button @click="sendActionToChrome('stb-get-spreadsheet-data')">Get spreadsheet data</button>
   </div>
 </template>
 
 <script lang="ts" setup>
   import { onMounted } from 'vue';
 
-  function sendAction() {
+  function sendActionToChrome(action: sidepanelCommunication) {
+    let dataToSend = "";
+    if(action === "stb-get-spreadsheet-data") {
+      dataToSend = import.meta.env.VITE_SPREADSHEET_TO_ACCESS;
+      // dataToSend = process.env.VITE_SPREADSHEET_TO_ACCESS;
+    }
     // @ts-ignore
-    chrome.runtime.sendMessage({ action: 'stb-run-hello-world' });
-    // chrome.runtime.sendMessage({ action: 'show-alert' }, res);
-  }
-  function sendAction2() {
-    // @ts-ignore
-    chrome.runtime.sendMessage({ action: 'stb-get-spreadsheet-data' });
-    // chrome.runtime.sendMessage({ action: 'show-alert' }, res);
+    chrome.runtime.sendMessage({ action: action, data: dataToSend });
   }
 
   onMounted(() => {
@@ -26,7 +25,7 @@
       if (message.action === 'bts-run-hello-world') {
         alert('Sidepanel received: ' + message.data);
       }
-      if(message.action === 'bts-get-spreadsheet-data') {
+      else if(message.action === 'bts-get-spreadsheet-data') {
         
         alert('Sidepanel received spreadsheet data: ' + message.data);
       }
