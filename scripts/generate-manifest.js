@@ -29,7 +29,7 @@ const manifest = {
     "type": "module"
   },
   "side_panel": {
-    "default_path": "sidepanel.html"
+    "default_path": "index.html"
   },
   "content_scripts": [
     {
