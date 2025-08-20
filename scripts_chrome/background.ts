@@ -14,8 +14,12 @@ chrome.runtime.onMessage.addListener((message: messageCrossScript, sender, sendR
     case 'stb-get-spreadsheet-data':
       getSpreadsheetData(message.data);
       break;
+    case 'stb-absen-function':
+      forwardActionToContentTS('btc-absen-function');
+      break;
     case 'ctb-run-hello-world':
-      forwardActionToSidePanel(message)
+      forwardActionToSidePanel(message);
+      break;
     default:
       break;
   }
@@ -28,13 +32,14 @@ function forwardActionToSidePanel(yourAction: messageCrossScript) {
   })
 }
 
-function forwardActionToContentTS (yourActionName: sidepanelCommunication) {
+function forwardActionToContentTS (yourActionName: sidepanelCommunication, data?: any) {
   
   chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
       if (tabs[0]?.id) {
         try {
           await chrome.tabs.sendMessage(tabs[0].id, {
-            action: yourActionName
+            action: yourActionName,
+            data
           });
         } catch (error) {
           // If content script not ready, inject it and try again
@@ -48,7 +53,8 @@ function forwardActionToContentTS (yourActionName: sidepanelCommunication) {
             setTimeout(async () => {
               try {
                 await chrome.tabs.sendMessage(tabs[0].id!, {
-                  action: yourActionName
+                  action: yourActionName,
+                  data
                 });
               } catch (e) {
                 console.log('Still unable to connect to content script');
