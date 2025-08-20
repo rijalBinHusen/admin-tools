@@ -1,42 +1,39 @@
 import { type spreadsheetResponse } from "../scripts_chrome.types";
+import { getAuthToken } from "./googleGetToken"
 
 export class GoogleSpreadsheet {
-  
-  private async getAuthToken(interactive = true) {
-    return new Promise((resolve, reject) => {
-      chrome.identity.getAuthToken({ interactive }, (token) => {
-        if (chrome.runtime.lastError) {
-          return reject(chrome.runtime.lastError);
-        }
-        resolve(token);
-      });
-    });
-  }
+
+  private token = "";
 
   async getValueOnSpreadsheet(url: string): Promise<spreadsheetResponse> {
+    if(!url) return {
+      data: "Spreadsheet URL invalid",
+      isSuccess: false
+    }
+
     try {
-      const token = await this.getAuthToken(true); // true = show Google login popup if needed
+      // check is token available
+      if(!this.token) this.token = await getAuthToken(true); // true = show Google login popup if needed
       // console.log("Access Token:", token);
 
       // Example: Call Google Sheets API
-      // process.env.VITE_SPREADSHEET_TO_ACCESS || "",
       const response = await fetch(
         url,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${this.token}`,
           },
         }
       );
       const data = await response.json();
-      console.log(data)
+      
       return {
         isSuccess: true,
         data: JSON.stringify(data)
       }
 
     } catch (err) {
-      console.error("Error getting token:", err);
+      
       return {
         isSuccess: false,
         data: err

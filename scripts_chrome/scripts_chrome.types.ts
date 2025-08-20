@@ -20,3 +20,9 @@ export interface messageCrossScript {
     action: sidepanelCommunication,
     data: string
 }
+
+export interface GoogleApiResult {
+    isSuccess: boolean
+    message: string
+    id: string
+}
