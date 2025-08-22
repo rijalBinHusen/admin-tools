@@ -161,7 +161,7 @@ input[type="text"] {
 .nav,
 .nav .current,
 .nav a:hover {
-  background: #000;
+  background: #1e1e1e;
   color: #fff;
 }
 .nav {
