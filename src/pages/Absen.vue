@@ -21,9 +21,11 @@
 
 <template>
     <!-- [392, 4513, 4511, 4512, 4509, 4515, 4516, 4514, 4508, 4510] -->
-    <div class="checkbox-group">
-      <label v-for="departemen of departements">
-        <input type="checkbox" name="option" :value="departemen.id"> {{ departemen.name }}
-      </label>
+    <div class="row">
+        <div v-for="departemen of departements" class="col c12">
+        <label>
+            <input type="checkbox" name="option" :value="departemen.id"> {{ departemen.name }}
+        </label>
+        </div>
     </div>
 </template>
