@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+    import { ref } from 'vue';
+
     const departements = [
         { id: 240, name: " GUDANG PRODUK STAFF" },
         { id: 392, name: " GUDANG JADI" },
@@ -17,6 +19,13 @@
         { id: 4530, name: "BL GJJBN" },
         { id: 871, name: "BL GJST" }
     ]
+
+    const departementSelected = ref<number[]>([]);
+    const datePick = ref('');
+
+    function handleSubmit() {
+        console.log(departementSelected.value, datePick.value)
+    }
 </script>
 
 <template>
@@ -24,8 +33,20 @@
     <div class="row">
         <div v-for="departemen of departements" class="col c12">
         <label>
-            <input type="checkbox" name="option" :value="departemen.id"> {{ departemen.name }}
+            <input 
+                type="checkbox" 
+                name="option" 
+                :value="departemen.id"
+                v-model="departementSelected"
+            > {{ departemen.name }}
         </label>
+        </div>
+        <div class="col c12">
+            <label for="datePick">Periode </label>
+            <input type="date" name="datePick" id="datePick" v-model="datePick">
+        </div>
+        <div>
+            <input class="btn btn-b btn-sm smooth" type="submit" name="submit" id="submit" @click="handleSubmit">
         </div>
     </div>
 </template>
