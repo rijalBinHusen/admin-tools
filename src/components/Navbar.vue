@@ -1,10 +1,11 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 
-  
-  defineProps<{ menu: string[] }>();
-  const emit = defineEmits(['selectMenu'])
-  const currentPage = ref("");
+const props = defineProps<{
+  menu: readonly string[]
+}>();
+const emit = defineEmits(['selectMenu'])
+const currentPage = ref("");
 
   function handleSelectMenu(menu: string) {
     emit('selectMenu', menu);
@@ -17,9 +18,8 @@ import { ref } from 'vue';
     <nav class="nav" tabindex="-1" onclick="this.focus()">
     <div class="container">
         <a href="#" class="pagename current">{{ currentPage == '' ? 'Home' : currentPage }}</a>
-        
         <a 
-          v-for="option in menu" 
+          v-for="option in props.menu" 
           href="#"
           @click="handleSelectMenu(option)"
         >
