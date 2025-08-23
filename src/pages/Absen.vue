@@ -63,8 +63,15 @@
         </div>
         <div>
             <input class="btn btn-b btn-sm smooth" type="submit" name="submit" id="submit" @click="handleSubmit">
+            <input 
+                v-if="messageFromContentJS.length"
+                class="btn btn-c btn-sm smooth" 
+                type="button" name="clear" id="clear" 
+                @click="messageFromContentJS.length = 0"
+                value="Clear message"
+            >
         </div>
-        <div class="msg">
+        <div class="msg" v-if="messageFromContentJS.length">
             <div style="color: black" v-for="msg of messageFromContentJS">{{ msg }}</div>
         </div>
     </div>
