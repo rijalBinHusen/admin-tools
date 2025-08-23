@@ -11,7 +11,8 @@ export class Absen {
     }
 
     private sendResponse(message: string, data?: string) {
-        this.writeResponse({ action: "ctb-absen-function", message, data })
+        this.writeResponse({ action: "ctb-absen-function", message, data });
+        // console.log(message, data)
     }
 
     private async downloadAbsen(date: Date, departemenId: number): Promise<string|undefined> {
@@ -20,7 +21,7 @@ export class Absen {
         const dateParameter = `${date.getMonth()+1}/${date.getDate()}/${date.getFullYear()}`
 
         const body = `tgl=${dateParameter}&dept=${departemenId}&dibuat=&mengetahui=`;
-        const fetchAbsen = await fetch("http://192.168.8.7:8080/finger/index.php/test11", {
+        const fetchAbsen = await fetch("/finger/index.php/test11", {
             "headers": {
               "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
               "accept-language": "en-US,en;q=0.9",
@@ -29,7 +30,7 @@ export class Absen {
               "pragma": "no-cache",
               "upgrade-insecure-requests": "1"
             },
-            "referrer": "http://192.168.8.7:8080/finger/index.php/test11",
+            "referrer": "/finger/index.php/test11",
             "referrerPolicy": "strict-origin-when-cross-origin",
             "body": body,
             "method": "POST",
@@ -145,8 +146,9 @@ export class Absen {
 
     async startGetAbsen(parameter: absenParameterFunction) {
         
-        // check is current tab === http://192.168.8.7:8080/finger/index.php/login
-        if (window.location.host != '192.168.8.7:8080') {
+        // check is current tab === /finger/index.php/login // http://182.16.186.138:8080/
+        const isURLValid = window.location.host == '192.168.8.7:8080' || window.location.host == '182.16.186.138:8080'
+        if (!isURLValid) {
             this.sendResponse("Anda tidak berada diaplikasi finger");
             return;
         }

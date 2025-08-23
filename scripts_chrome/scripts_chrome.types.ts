@@ -38,3 +38,9 @@ export interface absenParameterFunction {
     date: string
     departements: number[]
 }
+
+export interface messageCrossScriptAbsen {
+    action: 'stb-absen-function' | 'btc-absen-function' | 'bts-absen-function',
+    data: absenParameterFunction
+    message?: string
+}

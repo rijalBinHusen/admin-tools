@@ -15,7 +15,10 @@ chrome.runtime.onMessage.addListener((message: messageCrossScript, sender, sendR
       getSpreadsheetData(message.data);
       break;
     case 'stb-absen-function':
-      forwardActionToContentTS('btc-absen-function');
+      forwardActionToContentTS('btc-absen-function', message.data);
+      break;
+    case 'ctb-absen-function':
+      forwardActionToSidePanel(message);
       break;
     case 'ctb-run-hello-world':
       forwardActionToSidePanel(message);

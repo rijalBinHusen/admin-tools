@@ -15,5 +15,5 @@ chrome.runtime.onMessage.addListener( async (message: messageCrossScript, sender
 });
 
 function sendActionToBackground (data: messageCrossScript) {
-  chrome.runtime.sendMessage({ action: data.action, data: data.data });
+  chrome.runtime.sendMessage({ action: data.action, data: data.data, message: data.message });
 }
