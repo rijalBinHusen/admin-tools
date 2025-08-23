@@ -11,7 +11,9 @@ export class Absen {
     }
 
     private sendResponse(message: string, data?: string) {
-        this.writeResponse({ action: "ctb-absen-function", message, data });
+        const currentTime = new Date();
+        const messageToSend = `${currentTime.toLocaleTimeString()} | ${message}`
+        this.writeResponse({ action: "ctb-absen-function", message: messageToSend, data });
         // console.log(message, data)
     }
 
@@ -50,7 +52,7 @@ export class Absen {
             this.sendResponse(`Gagal mendapatkan data absen ${departemenId} tanggal ${dateParameter}`)
             return;
         }
-        this.sendResponse(`Berhasil mendapatkan data absen ${departemenId} tanggal ${dateParameter}`)
+        this.sendResponse(`Berhasil mendapatkan absen departemen ${departemenId} tanggal ${dateParameter}`)
         const dataArray = this.getTableDataAsArray(table);
         if(dataArray == null) return;
         // remove the first array

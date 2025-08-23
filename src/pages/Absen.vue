@@ -65,7 +65,7 @@
             <input class="btn btn-b btn-sm smooth" type="submit" name="submit" id="submit" @click="handleSubmit">
         </div>
         <div class="msg">
-            <div style="color: black" v-for="msg of messageFromContentJS">* {{ msg }}</div>
+            <div style="color: black" v-for="msg of messageFromContentJS">{{ msg }}</div>
         </div>
     </div>
 </template>
