@@ -15,7 +15,7 @@ chrome.runtime.onMessage.addListener( async (message: messageCrossScript, sender
       break;
     case 'btc-upah-bl':
       const upahBL = new UpahBorongan(sendActionToBackground);
-      upahBL.startGetUpah(message.data);
+      upahBL.runUpahFunction(message.data);
       break;
     default:
       break;

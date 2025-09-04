@@ -57,7 +57,7 @@ export class UpahBorongan {
         }
     }
 
-    async startGetUpah(parameter: parameterPeriodStartEnd) {
+    async runUpahFunction(parameter: parameterPeriodStartEnd) {
         
         // check is current tab === /finger/index.php/login // http://182.16.186.138:8080/
         const isURLValid = window.location.host == '192.168.8.7:8080' || window.location.host == '182.16.186.138:8080'
@@ -67,6 +67,7 @@ export class UpahBorongan {
         }
 
         if(parameter.mode === 'check') this.getAndCheckUpah(parameter);
+        if(parameter.mode === 'generate') this.checkAndGenerate(parameter);
     }
 
     private async getAndCheckUpah(parameter: parameterPeriodStartEnd) {
@@ -130,7 +131,7 @@ export class UpahBorongan {
 
     }
 
-    async checkAndGenerate(parameter: parameterPeriodStartEnd) {
+    private async checkAndGenerate(parameter: parameterPeriodStartEnd) {
 
         
         for(let wh of this.warehouses) {
