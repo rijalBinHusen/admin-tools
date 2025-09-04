@@ -121,14 +121,26 @@ export class UpahBorongan {
 
     }
 
-    private async generateUpahBorongan() {
+    async checkAndGenerate(parameter: parameterPeriodStartEnd) {
+
+        
+        for(let wh of this.warehouses) {
+            // check is wh is generated
+            const isWHGenerated = await this.checkIsUpahGenerated(wh, parameter.dateStart, parameter.dateEnd);
+            if(isWHGenerated) continue;
+            // else generate upah
+            await this.generateUpahBorongan(wh, parameter.dateStart, parameter.dateEnd);
+        }
+    }
+
+    private async generateUpahBorongan(warehouseId: number, dateStart: string, dateEnd: string) {
         const doGenerate = await fetch("/warehouse/generate/generate_borongan", {
             "headers": {
               "content-type": "application/x-www-form-urlencoded",
               "upgrade-insecure-requests": "1"
             },
             "referrer": "/warehouse/generate/borongan",
-            "body": "id_gd=4&tgl1=2025-08-25&tgl2=2025-08-31&link=borongan",
+            "body": `id_gd=${warehouseId}&tgl1=${dateStart}&tgl2=${dateEnd}&link=borongan`,
             "method": "POST",
             "mode": "cors",
             "credentials": "omit",
@@ -136,12 +148,24 @@ export class UpahBorongan {
           });
 
           if(doGenerate.type === 'opaqueredirect') {
-            this.sendResponse("Berhasil generate upah")
+              this.sendResponse("Berhasil generate upah")
+            } else {
+              this.sendResponse("Gagal generate upah")
           }
     }
 
-    private async checkIsUpahGenerated() {
-        
+    private async checkIsUpahGenerated(warehouseId: number, dateStart: string, dateEnd: string): Promise<boolean> {
+        const getDataUpah = await this.getListUpahBeforeGenerate(warehouseId, dateStart, dateEnd);
+
+        // if there is no data, assume that upah generated
+        if(!getDataUpah) return true;
+        let isGenerated = true;
+        // check is any upah doesn't generated
+        for(let upah of getDataUpah.list) {
+            if(upah.err_ == "1") isGenerated = false;
+        }
+
+        return isGenerated;
     }
     
     /**
