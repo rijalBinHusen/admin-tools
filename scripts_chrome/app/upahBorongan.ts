@@ -46,9 +46,9 @@ export class UpahBorongan {
                 throw new Error("Gagal mendapatkan upah");
             }
     
-            this.sendResponse("Berhasil mendapatkan upah gudang "+ warehouseId);
-    
             const dataAsJson = await getData.json() as GetListUpahResponse;
+            
+            this.sendResponse(dataAsJson.list.length + " Data didapatkan");
     
             return dataAsJson;
         } catch (error) {
@@ -70,18 +70,25 @@ export class UpahBorongan {
     }
 
     private async getAndCheckUpah(parameter: parameterPeriodStartEnd) {
-
+        this.sendResponse("Mendapatkan dan memeriksa upah")
         for(let wh of this.warehouses) {
             const getData = await this.getListUpahBeforeGenerate(wh, parameter.dateStart, parameter.dateEnd);
             if(!getData) continue;
 
-            this.checkDifferentDockOnItem(getData);
             // check each data
+            this.checkDifferentDockOnItem(getData);
+
+            // for 2 second
+            await new Promise((resolve) => {
+                setTimeout(() => {
+                resolve(''); // Resolve the promise with an empty string
+                }, 2000); // 2000 milliseconds = 2 seconds
+            });   
         }
 
         // if there is no errors
         if(!this.errorsChecker.length) {
-            this.sendResponse("Proses pemeriksaan selesai, tidak ditemukan ketidak sesuaian!")
+            this.sendResponse("Proses pemeriksaan selesai, data telah sesuai!")
         }
         // show errors
         else {
@@ -99,6 +106,7 @@ export class UpahBorongan {
         const listChecked = <ListUpahResponse[]>[];
         for(let d of upah.list) {
             // check price
+            if(!d.inventory_unit.includes('Ctn')) continue;
             const isPriceOke = Number(d.price) > 0;
             if(!isPriceOke) {
                 const msg = `Harga upah tidak ditemukan\n\n${d.gudang} ${d.itemid}\n${d.nodo} harga ${d.price}`;
@@ -110,8 +118,9 @@ export class UpahBorongan {
             // if date found
             if(findIndex != -1) {
                 const datum = listChecked[findIndex];
+                const dockBefore = datum.dock.substring(0,1);
                 // if dock is different
-                if(datum.dock != d.dock.substring(0,1)) {
+                if(dockBefore != d.dock.substring(0,1)) {
                     this.errorsChecker.push(`${datum.gudang} ${datum.itemid}\n${datum.nodo} ${datum.dock} dan ${d.nodo} ${d.dock}`)
                 }
             } else {
