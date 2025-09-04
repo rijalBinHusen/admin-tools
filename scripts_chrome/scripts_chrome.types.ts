@@ -19,6 +19,10 @@ export type sidepanelCommunication = "stb-run-hello-world"
                                 |"btc-absen-function"
                                 |"bts-absen-function"
                                 |"ctb-absen-function"
+                                |"stb-upah-bl"
+                                |"btc-upah-bl"
+                                |"bts-upah-bl"
+                                |"ctb-upah-bl"
 
 export interface messageCrossScript {
     action: sidepanelCommunication,
@@ -37,6 +41,11 @@ export type SendActionToBackground = (func: messageCrossScript) => void;
 export interface absenParameterFunction {
     date: string
     departements: number[]
+}
+
+export interface parameterPeriodStartEnd {
+    dateStart: string
+    dateEnd: string
 }
 
 export interface messageCrossScriptAbsen {

@@ -11,6 +11,9 @@ chrome.runtime.onMessage.addListener((message: messageCrossScript, sender, sendR
     case 'stb-run-hello-world':
       forwardActionToContentTS('btc-run-hello-world');
       break;
+    case 'ctb-run-hello-world':
+      forwardActionToSidePanel(message);
+      break;
     case 'stb-get-spreadsheet-data':
       getSpreadsheetData(message.data);
       break;
@@ -20,7 +23,10 @@ chrome.runtime.onMessage.addListener((message: messageCrossScript, sender, sendR
     case 'ctb-absen-function':
       forwardActionToSidePanel(message);
       break;
-    case 'ctb-run-hello-world':
+    case 'stb-upah-bl':
+      forwardActionToContentTS('btc-upah-bl', message.data);
+      break;
+    case 'ctb-upah-bl':
       forwardActionToSidePanel(message);
       break;
     default:
