@@ -24,6 +24,7 @@ chrome.runtime.onMessage.addListener((message: messageCrossScript, sender, sendR
       forwardActionToSidePanel(message);
       break;
     case 'stb-upah-bl':
+      if(message)
       forwardActionToContentTS('btc-upah-bl', message.data);
       break;
     case 'ctb-upah-bl':

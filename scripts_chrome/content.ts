@@ -1,17 +1,26 @@
 import { type messageCrossScript } from "./scripts_chrome.types";
 import { Absen } from "./app/absen";
+import { UpahBorongan } from "./app/upahBorongan";
 
 chrome.runtime.onMessage.addListener( async (message: messageCrossScript, sender, sendResponse) => {
-  if (message.action === 'btc-run-hello-world') {
-    alert('Content script function executed!');
-    // reply message to background ts and forward to sidepanel
-    sendActionToBackground({ action: 'ctb-run-hello-world', data: 'Hello from content.js!' })
+  switch (message.action) {
+    case 'btc-run-hello-world':
+      alert('Content script function executed!');
+      // reply message to background ts and forward to sidepanel
+      sendActionToBackground({ action: 'ctb-run-hello-world', data: 'Hello from content.js!' })
+      break;
+    case 'btc-absen-function':
+      const abs = new Absen(sendActionToBackground);
+      abs.startGetAbsen(message.data);
+      break;
+    case 'btc-upah-bl':
+      const upahBL = new UpahBorongan(sendActionToBackground);
+      upahBL.startGetUpah(message.data);
+      break;
+    default:
+      break;
   }
 
-  if(message.action === "btc-absen-function") {
-    const abs = new Absen(sendActionToBackground);
-    abs.startGetAbsen(message.data);
-  }
 });
 
 function sendActionToBackground (data: messageCrossScript) {

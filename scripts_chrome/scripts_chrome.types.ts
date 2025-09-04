@@ -15,16 +15,12 @@ export type sidepanelCommunication = "stb-run-hello-world"
                                 |"stb-get-spreadsheet-data"
                                 |"btc-get-spreadsheet-data"
                                 |"bts-get-spreadsheet-data"
-                                |"stb-absen-function"
-                                |"btc-absen-function"
-                                |"bts-absen-function"
                                 |"ctb-absen-function"
-                                |"stb-upah-bl"
-                                |"btc-upah-bl"
-                                |"bts-upah-bl"
+                                |'btc-absen-function'
                                 |"ctb-upah-bl"
+                                |'btc-upah-bl'
 
-export interface messageCrossScript {
+export interface messageCrossScriptGeneral {
     action: sidepanelCommunication,
     data: any
     message?: string
@@ -36,6 +32,8 @@ export interface GoogleApiResult {
     id: string
 }
 
+export type messageCrossScript = messageCrossScriptGeneral|messageCrossScriptAbsen|messageCrossScriptUpah
+
 export type SendActionToBackground = (func: messageCrossScript) => void;
 
 export interface absenParameterFunction {
@@ -46,10 +44,19 @@ export interface absenParameterFunction {
 export interface parameterPeriodStartEnd {
     dateStart: string
     dateEnd: string
+    mode?: modeUpah
 }
 
 export interface messageCrossScriptAbsen {
     action: 'stb-absen-function' | 'btc-absen-function' | 'bts-absen-function',
     data: absenParameterFunction
+    message?: string
+}
+
+export type modeUpah = 'check'|'generate';
+
+export interface messageCrossScriptUpah {
+    action: 'stb-upah-bl' | 'btc-upah-bl' | 'bts-upah-bl',
+    data: parameterPeriodStartEnd
     message?: string
 }

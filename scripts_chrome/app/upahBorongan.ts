@@ -1,6 +1,6 @@
 import { type SendActionToBackground, parameterPeriodStartEnd} from "../scripts_chrome.types";
 
-class UpahBorongan {
+export class UpahBorongan {
     private warehouses = [1,2,3,4,5,6,7];
     private errorsChecker = <string[]>[];
 
@@ -65,6 +65,11 @@ class UpahBorongan {
             this.sendResponse("Anda tidak berada diaplikasi warehouse");
             return;
         }
+
+        if(parameter.mode === 'check') this.getAndCheckUpah(parameter);
+    }
+
+    private async getAndCheckUpah(parameter: parameterPeriodStartEnd) {
 
         for(let wh of this.warehouses) {
             const getData = await this.getListUpahBeforeGenerate(wh, parameter.dateStart, parameter.dateEnd);

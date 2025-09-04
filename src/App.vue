@@ -5,15 +5,17 @@ import { markRaw, ref } from 'vue';
 import Navbar from './components/Navbar.vue';
 import Absen from "./pages/Absen.vue";
 import Stock from './pages/Stock.vue';
+import UpahBL from './pages/UpahBL.vue';
 
 const pages = {
   absen: markRaw(Absen),
-  stock: markRaw(Stock)
+  stock: markRaw(Stock),
+  upahBL: markRaw(UpahBL)
 }
 type PageOption = keyof typeof pages;
 const currentPage = ref<PageOption>('stock')
 
-const menu = ['Absen', 'Stock', 'Detail muat'] as const;
+const menu = ['Absen', 'Upah borongan', 'Stock', 'Detail muat'] as const;
 type MenuOption = typeof menu[number];
 
 function handleChangePages (page: MenuOption) {
@@ -23,6 +25,9 @@ function handleChangePages (page: MenuOption) {
       break;
     case 'Stock':
       currentPage.value = 'stock';
+      break;
+    case 'Upah borongan':
+      currentPage.value = 'upahBL';
       break;
     default:
       break;
