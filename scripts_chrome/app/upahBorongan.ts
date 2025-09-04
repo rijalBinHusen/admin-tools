@@ -46,9 +46,9 @@ export class UpahBorongan {
                 throw new Error("Gagal mendapatkan upah");
             }
     
-            // this.sendResponse("Berhasil mendapatkan upah gudang "+ warehouseId);
-    
             const dataAsJson = await getData.json() as GetListUpahResponse;
+            
+            this.sendResponse(dataAsJson.list.length + " Data didapatkan");
     
             return dataAsJson;
         } catch (error) {
@@ -75,8 +75,15 @@ export class UpahBorongan {
             const getData = await this.getListUpahBeforeGenerate(wh, parameter.dateStart, parameter.dateEnd);
             if(!getData) continue;
 
-            this.checkDifferentDockOnItem(getData);
             // check each data
+            this.checkDifferentDockOnItem(getData);
+
+            // for 2 second
+            await new Promise((resolve) => {
+                setTimeout(() => {
+                resolve(''); // Resolve the promise with an empty string
+                }, 2000); // 2000 milliseconds = 2 seconds
+            });   
         }
 
         // if there is no errors
