@@ -24,10 +24,10 @@ export class UpahBorongan {
      */
 
     private async getListUpahBeforeGenerate(warehouseId: number, dateStart: string, dateEnd: string): Promise<GetListUpahResponse|false> {
-        this.sendResponse("Mendapatkan upah Gudang id " + warehouseId )
+        
         try {
             
-            const getData = await fetch(`/warehouse/generate/get_list_borongan?tgl1=${dateStart}&tgl2=${dateEnd}&get_gd=${warehouseId}&src=1`, {
+            const getData = await fetch(`/warehouse/report/get_list_borongan?tgl1=${dateStart}&tgl2=${dateEnd}&tgl3=${dateEnd}&tgl4=${dateEnd}&get_gd[]=${warehouseId}&option=0&src=1`, {
                 "headers": {
                   "accept": "application/json, text/javascript, */*; q=0.01",
                   "accept-language": "en-US,en;q=0.9",
@@ -35,7 +35,7 @@ export class UpahBorongan {
                   "pragma": "no-cache",
                   "x-requested-with": "XMLHttpRequest"
                 },
-                "referrer": "/warehouse/generate/borongan",
+                "referrer": "/warehouse/report/borongan",
                 "body": null,
                 "method": "GET",
                 "mode": "cors",
@@ -46,7 +46,7 @@ export class UpahBorongan {
                 throw new Error("Gagal mendapatkan upah");
             }
     
-            this.sendResponse("Berhasil mendapatkan upah");
+            this.sendResponse("Berhasil mendapatkan upah gudang "+ warehouseId);
     
             const dataAsJson = await getData.json() as GetListUpahResponse;
     
