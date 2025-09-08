@@ -55,7 +55,10 @@ export class Absen {
         }
         this.sendResponse(`Berhasil mendapatkan absen departemen ${departemenId} tanggal ${dateParameter}`)
         const dataArray = this.getTableDataAsArray(table);
-        if(dataArray == null) return;
+        if(dataArray == null) {
+            this.sendResponse(`Gagal memproses data, silahkan ulangi`)
+            return;
+        }
         // remove the first array
         // dataArray.shift();
         // [No, userid,	name,	deptname,	ma,	ssn,	in,	out,	Jam Kerja,	in,	out,	pkln,	pkll, ]
@@ -96,13 +99,15 @@ export class Absen {
                 // if jam in > out ? jam out + 24
                 if(jamIn > riilJamOut) jamOut = riilJamOut + 24;
                 // jam out - jam in
-                setStdHour = jamOut - jamIn - restHour;
+                setStdHour = jamOut - jamIn;
+                if(setStdHour > 5) {
+                    if(restHour == 0) restHour = 1;
+                    setStdHour = jamOut - jamIn - restHour
+                }
             // ==================== end of set std hour for all labor
             if(!isOutsourceLabor) {
                 if(isSaturday) {
                     if(setStdHour > 6) overTime = setStdHour - 5;
-                    if(setStdHour > 5 && setStdHour <= 6) restHour = 1;
-                    
                     setStdHour = 5;
                 } else {
                     overTime = setStdHour - 7;
@@ -198,7 +203,7 @@ export class Absen {
         for(let dep of parameter.departements) {
             this.sendResponse(`Mendapatkan data ${index} dari ${parameter.departements.length}`)
             const getAbsen = await this.downloadAbsen(dateTimeInput, dep);
-            if(getAbsen == null) continue;
+            if(getAbsen == null) return;
             result.push(getAbsen);
             index++;
         }
