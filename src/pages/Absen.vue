@@ -9,7 +9,7 @@
         { id: 4511, name: "SUPPORT JABON SIR 1" },
         { id: 4512, name: "SUPPORT JABON SIR 2" },
         { id: 4509, name: "STAPEL SIR 1" },
-        { id: 4515, name: "SUPPORT SIR 11" },
+        { id: 4515, name: "SUPPORT SIR 1" },
         { id: 4516, name: "SUPPORT SIR 2" },
         { id: 4514, name: "SUPPORT SIR" },
         { id: 4508, name: "SOPIR LANSIR SIR" },
@@ -25,6 +25,7 @@
     const datePick = ref('');
 
     function handleSubmit() {
+        messageFromContentJS.value.length = 0;
         // @ts-ignore
         chrome.runtime.sendMessage(<messageCrossScriptAbsen>{ action: 'stb-absen-function', data: {
             date: datePick.value,

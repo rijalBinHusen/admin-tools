@@ -5,6 +5,7 @@ export class Absen {
 
     private messageToConfirm = <string[]>[];
     private writeResponse: SendActionToBackground;
+    private isProcess = false;
 
     constructor(funcToSendActionToBackground: SendActionToBackground) {
         this.writeResponse = funcToSendActionToBackground;
@@ -65,6 +66,7 @@ export class Absen {
 
         for (let i = 0; i < dataArray.length; i++) {
             const row = dataArray[i];
+            const workingHours = Number(row[8]);
             if(i == 0) {
                 result.push("Tanggal,id_finder,nama,departemen,masuk,keluar,istirahat,lembur,jk")
                 continue;
@@ -72,23 +74,45 @@ export class Absen {
             let restHour = 1;
 
             const isFriday = date.getDay() == 5;
+            const isSaturday = date.getDay() == 6;
+            const isOutsourceLabor = departemenId != 392;
+            const isWorkingHours5 = workingHours <= 6;
+            const isMorningWorker = Number(row[6].substring(0, 2)) < 12;
             // if friday and its outsourcing
-            if(isFriday && departemenId != 392) restHour = 1.5;
-            // if not friday and outsourcing 0.5 hours rest
-            // if(!isFriday && departemenId == 4509) restHour = 0.5;
-            // if working in 5 hours, there is no rest
-            if(Number(row[8]) <= 6) restHour = 0;
+            if(isFriday && isOutsourceLabor && isMorningWorker) restHour = 1.5;
+            if(isWorkingHours5) restHour = 0;
             
             // std hour another than 392 departemen id
-            let setStdHour = Number(row[8]) > 0 ? Number(row[8]) - restHour : 0;
-            // if departemen id 392 && saturday and > 6 and morning worker
-            const isSaturdayAndMorningWorkerOverTimeAndDeptId392 = departemenId == 392 && date.getDay() == 6 && Number(row[8]) > 6 && Number(row[6].substring(0, 2)) < 12;
-            if(isSaturdayAndMorningWorkerOverTimeAndDeptId392) setStdHour += 0.5;
+            let setStdHour = 7;
+            let overTime = 0;
+            // ==================== set std hour for all labor
+                const riilJamIn = Number(row[6].substring(0, 2));
+                const riilJamOut = Number(row[7].substring(0, 2));
+                const riilMenitIn = Number(row[6].substring(3, 5));
+                let jamIn = 0;
+                let jamOut = riilJamOut;
+                // Jam masuk, if menit != 00 ? jam + 1 : jam tetap samain
+                if(riilMenitIn != 0) jamIn = riilJamIn + 1;
+                // if jam in > out ? jam out + 24
+                if(jamIn > riilJamOut) jamOut = riilJamOut + 24;
+                // jam out - jam in
+                setStdHour = jamOut - jamIn - restHour;
+            // ==================== end of set std hour for all labor
+            if(!isOutsourceLabor) {
+                if(isSaturday) {
+                    if(setStdHour > 6) overTime = setStdHour - 5;
+                    if(setStdHour > 5 && setStdHour <= 6) restHour = 1;
+                    
+                    setStdHour = 5;
+                } else {
+                    overTime = setStdHour - 7;
+                    setStdHour = 7;
+                }
+            }
 
-            // eventEmit.emit("message", `\n${new Date(tanggal)} - ${Number(row[1])}, ${row[6]}, ${row[7]}, ${restHour}, ${Number(row[11])}, ${setStdHour}\n`)
             let isNeedToPush = false;
             if(isSunday) {
-                if(Number(row[8]) > 0) isNeedToPush = true;
+                if(workingHours > 0) isNeedToPush = true;
             } 
             else isNeedToPush = true;
 
@@ -100,7 +124,7 @@ export class Absen {
                 }
 
                 const peopleName = row[2].replace(",", ". ");
-                result.push([toSpreadsheetDate(new Date(dateParameter)), Number(row[1]), peopleName, row[3], row[6], row[7], restHour, Number(row[11]), setStdHour].join(","))
+                result.push([toSpreadsheetDate(new Date(dateParameter)), Number(row[1]), peopleName, row[3], row[6], row[7], restHour, overTime, setStdHour].join(","))
             }
         }
         return result.join("\n");
@@ -147,6 +171,9 @@ export class Absen {
     }
 
     async startGetAbsen(parameter: absenParameterFunction) {
+
+        if(this.isProcess) return;
+        this.isProcess = true;
         
         // check is current tab === /finger/index.php/login // http://182.16.186.138:8080/
         const isURLValid = window.location.host == '192.168.8.7:8080' || window.location.host == '182.16.186.138:8080'
@@ -190,5 +217,6 @@ export class Absen {
         const fileName = `${dateTimeInput.toLocaleDateString()} Absensi gudang jadi ${new Date().toLocaleTimeString("ID-id", { hour12: false })}.csv`;
         downloadAsFile(result.join("\n"), fileName);
         this.sendResponse("Berhasil mengunduh data " + fileName);
+        this.isProcess = false;
     }
 }

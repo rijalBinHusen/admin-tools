@@ -133,14 +133,20 @@ export class UpahBorongan {
 
     private async checkAndGenerate(parameter: parameterPeriodStartEnd) {
 
+        this.sendResponse("Memeriksa dan generate data upah")
         
         for(let wh of this.warehouses) {
             // check is wh is generated
             const isWHGenerated = await this.checkIsUpahGenerated(wh, parameter.dateStart, parameter.dateEnd);
-            if(isWHGenerated) continue;
+            if(isWHGenerated) {
+                this.sendResponse("Seluruh upah telah digenerate!")
+                continue;
+            }
             // else generate upah
+            this.sendResponse("Menjalankan proses digenerate!")
             await this.generateUpahBorongan(wh, parameter.dateStart, parameter.dateEnd);
         }
+        this.sendResponse("Selesai generate upah")
     }
 
     private async generateUpahBorongan(warehouseId: number, dateStart: string, dateEnd: string) {
@@ -153,11 +159,10 @@ export class UpahBorongan {
             "body": `id_gd=${warehouseId}&tgl1=${dateStart}&tgl2=${dateEnd}&link=borongan`,
             "method": "POST",
             "mode": "cors",
-            "credentials": "omit",
-            "redirect": "manual"
+            "credentials": "omit"
           });
 
-          if(doGenerate.type === 'opaqueredirect') {
+          if(doGenerate.status == 302) {
               this.sendResponse("Berhasil generate upah")
             } else {
               this.sendResponse("Gagal generate upah")
@@ -165,17 +170,47 @@ export class UpahBorongan {
     }
 
     private async checkIsUpahGenerated(warehouseId: number, dateStart: string, dateEnd: string): Promise<boolean> {
-        const getDataUpah = await this.getListUpahBeforeGenerate(warehouseId, dateStart, dateEnd);
+                
+        try {
+            
+            const getData = await fetch(`/warehouse/generate/get_list_borongan?tgl1=${dateStart}&tgl2=${dateEnd}&get_gd=${warehouseId}&src=1`, {
+                            "headers": {
+                                    "accept": "application/json, text/javascript, */*; q=0.01",
+                                    "accept-language": "en-US,en;q=0.9,id-ID;q=0.8,id;q=0.7",
+                                    "x-requested-with": "XMLHttpRequest"
+                                },
+                                "referrer": "/warehouse/generate/borongan",
+                                "body": null,
+                                "method": "GET",
+                                "mode": "cors",
+                                "credentials": "include"
+                            });
+    
+            if(getData.status >= 400) {
+                throw new Error("Gagal mendapatkan upah");
+            }
 
-        // if there is no data, assume that upah generated
-        if(!getDataUpah) return true;
-        let isGenerated = true;
-        // check is any upah doesn't generated
-        for(let upah of getDataUpah.list) {
-            if(upah.err_ == "1") isGenerated = false;
+            // upah approved would be empty
+    
+            const dataAsJson = await getData.json() as GetListUpahResponse;
+            
+            this.sendResponse(dataAsJson.list.length + " Data didapatkan");
+    
+            // if there is no data, assume that upah generated
+            let isGenerated = true;
+            // check is any upah doesn't generated
+            for(let upah of dataAsJson.list) {
+                if(upah.err_ == "1") isGenerated = false;
+            }
+    
+            return isGenerated;
+
+        } catch (error) {
+            this.sendResponse("Error mendapatkan upah: "+ JSON.stringify(error))
+            return true;
         }
 
-        return isGenerated;
+                            
     }
     
     /**
