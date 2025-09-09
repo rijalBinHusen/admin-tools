@@ -5,7 +5,7 @@ const env = loadEnv("build", process.cwd(), "");
 
 const manifest = {
   "manifest_version": 3,
-  "name": "Vue Sidepanel Extension",
+  "name": "Admin tools",
   "version": "1.0",
   "description": "Sidepanel with Vue",
   "permissions": [

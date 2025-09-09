@@ -92,7 +92,7 @@ export class Absen {
                 const riilJamIn = Number(row[6].substring(0, 2));
                 const riilJamOut = Number(row[7].substring(0, 2));
                 const riilMenitIn = Number(row[6].substring(3, 5));
-                let jamIn = 0;
+                let jamIn = riilJamIn;
                 let jamOut = riilJamOut;
                 // Jam masuk, if menit != 00 ? jam + 1 : jam tetap samain
                 if(riilMenitIn != 0) jamIn = riilJamIn + 1;
