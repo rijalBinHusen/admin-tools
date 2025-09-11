@@ -1,5 +1,6 @@
 import { downloadAsFile, toSpreadsheetDate } from "../utils/tools";
 import { type SendActionToBackground, absenParameterFunction } from "../scripts_chrome.types";
+import { detectWorkingAndOverHours } from "./absenFunction"
 
 export class Absen {
 
@@ -63,61 +64,22 @@ export class Absen {
         // dataArray.shift();
         // [No, userid,	name,	deptname,	ma,	ssn,	in,	out,	Jam Kerja,	in,	out,	pkln,	pkll, ]
         // data to return [tanggal, userid, in, out, istirahat=1, pkln, Jam kerja]
-        const isSunday = date.getDay() == 0;
-
+        
         const result = <string[]>[];
-
+        
+        const isSunday = date.getDay() == 0;
         for (let i = 0; i < dataArray.length; i++) {
             const row = dataArray[i];
-            const workingHours = Number(row[8]);
             if(i == 0) {
                 result.push("Tanggal,id_finder,nama,departemen,masuk,keluar,istirahat,lembur,jk")
                 continue;
             }
-            let restHour = 1;
 
-            const isFriday = date.getDay() == 5;
-            const isSaturday = date.getDay() == 6;
-            const isOutsourceLabor = departemenId != 392;
-            const isWorkingHours5 = workingHours <= 6;
-            const isMorningWorker = Number(row[6].substring(0, 2)) < 12;
-            // if friday and its outsourcing
-            if(isFriday && isOutsourceLabor && isMorningWorker) restHour = 1.5;
-            if(isWorkingHours5) restHour = 0;
+            const detectHour = detectWorkingAndOverHours(date, departemenId, Number(row[8]), row[6], row[7]);
             
-            // std hour another than 392 departemen id
-            let setStdHour = 7;
-            let overTime = 0;
-            // ==================== set std hour for all labor
-                const riilJamIn = Number(row[6].substring(0, 2));
-                const riilJamOut = Number(row[7].substring(0, 2));
-                const riilMenitIn = Number(row[6].substring(3, 5));
-                let jamIn = riilJamIn;
-                let jamOut = riilJamOut;
-                // Jam masuk, if menit != 00 ? jam + 1 : jam tetap samain
-                if(riilMenitIn != 0) jamIn = riilJamIn + 1;
-                // if jam in > out ? jam out + 24
-                if(jamIn > riilJamOut) jamOut = riilJamOut + 24;
-                // jam out - jam in
-                setStdHour = jamOut - jamIn;
-                if(setStdHour > 5) {
-                    if(restHour == 0) restHour = 1;
-                    setStdHour = jamOut - jamIn - restHour
-                }
-            // ==================== end of set std hour for all labor
-            if(!isOutsourceLabor) {
-                if(isSaturday) {
-                    if(setStdHour > 6) overTime = setStdHour - 5;
-                    setStdHour = 5;
-                } else {
-                    overTime = setStdHour - 7;
-                    setStdHour = 7;
-                }
-            }
-
             let isNeedToPush = false;
             if(isSunday) {
-                if(workingHours > 0) isNeedToPush = true;
+                if(detectHour.workingHours > 0) isNeedToPush = true;
             } 
             else isNeedToPush = true;
 
@@ -129,7 +91,7 @@ export class Absen {
                 }
 
                 const peopleName = row[2].replace(",", ". ");
-                result.push([toSpreadsheetDate(new Date(dateParameter)), Number(row[1]), peopleName, row[3], row[6], row[7], restHour, overTime, setStdHour].join(","))
+                result.push([toSpreadsheetDate(new Date(dateParameter)), Number(row[1]), peopleName, row[3], row[6], row[7], detectHour.restHour, detectHour.overTime, detectHour.stdHour].join(","))
             }
         }
         return result.join("\n");
