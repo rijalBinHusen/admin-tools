@@ -1,16 +1,16 @@
 import { SendActionToBackground, type spreadsheetResponse } from "../scripts_chrome.types";
-import { getAuthToken } from "./googleGetToken"
 
 export class GoogleSpreadsheet {
 
   private token = "";
   sendResponse: SendActionToBackground;
 
-  constructor (sendResponse: SendActionToBackground) {
+  constructor (sendResponse: SendActionToBackground, token: string) {
     this.sendResponse = sendResponse;
+    this.token = token
   }
 
-  async getValueOnSpreadsheet(spreadsheetId: string, range: string): Promise<spreadsheetResponse> {
+  async getValuesOnSpreadsheet(spreadsheetId: string, range: string): Promise<spreadsheetResponse> {
     if(!spreadsheetId || !range) return {
       data: "Spreadsheet Id and range invalid",
       isSuccess: false
@@ -20,8 +20,7 @@ export class GoogleSpreadsheet {
 
     try {
       // check is token available
-      if(!this.token) this.token = await getAuthToken(true); // true = show Google login popup if needed
-      // console.log("Access Token:", token);
+      if(!this.token) throw new Error("Token unsetted");
 
       // Example: Call Google Sheets API
       const response = await fetch(
@@ -36,7 +35,7 @@ export class GoogleSpreadsheet {
       
       return {
         isSuccess: true,
-        data: JSON.stringify(data)
+        data: data
       }
 
     } catch (err) {
@@ -55,8 +54,6 @@ export class GoogleSpreadsheet {
    * @param values The row of values you want to append
    */
   async appendToSheet(spreadsheetId: string, range: string, values: any[]): Promise<spreadsheetResponse> {
-
-    if(!this.token) this.token = await getAuthToken(true); // true = show Google login popup if needed
 
     if(!this.token) throw new Error("Failed to get token access");
 
@@ -106,7 +103,7 @@ export class GoogleSpreadsheet {
    */
   async getLastRow(spreadsheetId: string, range: string): Promise<number> {
 
-    if(!this.token) this.token = await getAuthToken(true); // true = show Google login popup if needed
+    if(!this.token) throw new Error("Token unsetted")
 
     try {
       const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(range)}?majorDimension=ROWS`;
@@ -135,5 +132,46 @@ export class GoogleSpreadsheet {
     }
   }
 
+    /**
+   * Update a specific range in Google Sheets
+   *
+   * @param {string} spreadsheetId - The ID of the spreadsheet
+   * @param {string} range - The A1 notation of the range (e.g. "Sheet1!B2:C3")
+   * @param {any[][]} values - 2D array of values to set (rows × columns)
+   * @param {string} token - OAuth2 access token from chrome.identity.getAuthToken
+   * @returns {Promise<object>} - The update response
+   */
+  async setRangeValues(spreadsheetId: string, range: string, values: any[][]): Promise<spreadsheetResponse> {
 
+    if(!this.token) throw new Error("Token unsetted")
+    try {
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`;
+
+      const res = await fetch(url, {
+        method: "PUT", // <-- PUT = overwrite the given range
+        headers: {
+          "Authorization": `Bearer ${this.token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          values: values
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(`Sheets API error: ${data.error?.message}`);
+      }
+
+      return {
+        isSuccess: true,
+        data
+      }
+    } catch (err) {
+      
+      throw err;
+    }
+  }
 }
+export type GSheetType = InstanceType<typeof GoogleSpreadsheet>;

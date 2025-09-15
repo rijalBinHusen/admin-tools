@@ -82,7 +82,7 @@ export class Gdrive {
     * @param {string} newFileName - The name for the copied file
     * @returns {Promise<object>} - The created file resource (contains id, name, etc.)
     */
-    async makeAcopyOfAFile(fileId: string, newFileName: string): Promise<object> {
+    async makeAcopyOfAFile(fileId: string, newFileName: string): Promise<{ id: string, name: string}> {
      try {
        const url = `https://www.googleapis.com/drive/v3/files/${fileId}/copy`;
    

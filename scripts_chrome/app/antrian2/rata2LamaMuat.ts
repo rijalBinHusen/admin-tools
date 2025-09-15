@@ -3,14 +3,14 @@ import { type SendActionToBackground } from "../../scripts_chrome.types";
 import { GdriveType } from "../../utils/googleDrive";
 import { GSheetType } from "../../utils/googleSpreadsheet";
 
-export class Antrian2MonitoringKendaraan {
+export class Antrian2Rata2LamaMuat {
     private GdriveOperation: GdriveType;
     private GsheetOperation: GSheetType
 
-    templateSpreadsheetIdMonitoringKendaraan = "1A-77iD6HQM5tPQc_Pb2p526bvMtdkgLk-oL4Xsh1Pmc";
+    templateSpreadsheetIdRataRataLamaMuat = "16muHvCrVVYVLJX7RvsXC4g9EIOWs2p7KRJ9dCALMzhg";
+    folderIdRataRataLamaMuat = "1dQ0sr1mXS4htt-qGIv-4lD7-r6MoE5yh";
     folderIdMonitoringKendaraan = "1DHhQxXnQj0Nc1EAJPAPDZdLhBxJ7zN1b";
     // folderIdMonitoringKendaraan = "1KBYwGvnd0G8JkL9z1Z6XE7wAiKS4P0Zi";
-    spreadsheetIdMonitoringKendaraan = "";
 
     private writeResponse: SendActionToBackground;
 
@@ -69,34 +69,31 @@ export class Antrian2MonitoringKendaraan {
      * @param dateEnd string - The first period you want to get in DD-MM-YYYY
      */
 
-    async createReportMonitoringKendaraan(tanggal_mulai: string, tanggal_akhir: string, currentWeekNumber: number): Promise<string|false> {
+    async createReportRata2LamaMuat(tanggal_mulai: string, tanggal_akhir: string, currentWeekNumber: number): Promise<string|false> {
 
         try {
             const getData = await this.getData(tanggal_mulai, tanggal_akhir)
             
             if(typeof getData === 'string') throw new Error(getData);
-            if(!getData.length) throw new Error("Tidak ada data didapatkan (0)");
+            if(!getData.length) throw new Error("0 data didapatkan");
             
             // remove the first array
             getData.shift();
 
-            const newFilename = `Laporan muat W${currentWeekNumber} ${tanggal_mulai} sampai dengan ${tanggal_akhir}`;
-            
-            const spreadsheetId = await this.GdriveOperation.makeAcopyOfAFile(this.templateSpreadsheetIdMonitoringKendaraan, newFilename);
+            const newFilename = `Laporan muat dengan total QTY W${currentWeekNumber} ${tanggal_mulai} sampai dengan ${tanggal_akhir} rata rata lama muat`;
+            const spreadsheetId = await this.GdriveOperation.makeAcopyOfAFile(this.templateSpreadsheetIdRataRataLamaMuat, newFilename);
             if(spreadsheetId && !spreadsheetId?.id) throw new Error("Tidak ada spreadsheet id")
                 // move file
             await this.GdriveOperation.moveFileToFolder(spreadsheetId.id, this.folderIdMonitoringKendaraan)
             
             // insertdata
-            const filterData = getData.filter((val) => val[0] != 'GPACK');
-            const insertData = await this.GsheetOperation.setRangeValues(spreadsheetId.id, "Worksheet!A2:P", filterData)
+            const insertData = await this.GsheetOperation.setRangeValues(spreadsheetId.id, "Worksheet!A2:L", getData)
             if(insertData.isSuccess === false) throw new Error("Tidak dapat memasukkan data");
     
-            this.spreadsheetIdMonitoringKendaraan = spreadsheetId.id;
-            this.sendResponse(`Berhasil membuat report monitoring kendaraan: https://docs.google.com/spreadsheets/d/${spreadsheetId.id}\n\n`)
+            this.sendResponse(`Berhasil membuat report rata rata lama muat kendaraan: https://docs.google.com/spreadsheets/d/${spreadsheetId.id}\n\n`)
             return spreadsheetId.id;
         } catch (error) {
-            this.sendResponse(JSON.stringify(error))
+            this.sendResponse("Gagal generate report rata2 lama muat" + JSON.stringify(error))
             return false;
         }
 

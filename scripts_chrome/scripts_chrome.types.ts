@@ -1,6 +1,6 @@
 export interface spreadsheetResponse {
     isSuccess: boolean,
-    data: string
+    data: any
 }
 
 // StB =  sidepanel to background.js

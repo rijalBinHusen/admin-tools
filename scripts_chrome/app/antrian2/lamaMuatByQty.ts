@@ -7,10 +7,9 @@ export class Antrian2MonitoringKendaraan {
     private GdriveOperation: GdriveType;
     private GsheetOperation: GSheetType
 
-    templateSpreadsheetIdMonitoringKendaraan = "1A-77iD6HQM5tPQc_Pb2p526bvMtdkgLk-oL4Xsh1Pmc";
-    folderIdMonitoringKendaraan = "1DHhQxXnQj0Nc1EAJPAPDZdLhBxJ7zN1b";
-    // folderIdMonitoringKendaraan = "1KBYwGvnd0G8JkL9z1Z6XE7wAiKS4P0Zi";
-    spreadsheetIdMonitoringKendaraan = "";
+    templateSpreadsheetIdLaporanMuatByQuantity = "1l_bLL_PjvoEAxIqQueG4RwOZufbHSTMQfiL-IXx-_DI";
+    folderIdLaporanMuatByQuantity = "1M1NoKPWzCAu4z8P44zpzCIpDYRCm454c";
+    // "1KBYwGvnd0G8JkL9z1Z6XE7wAiKS4P0Zi";
 
     private writeResponse: SendActionToBackground;
 
@@ -69,34 +68,50 @@ export class Antrian2MonitoringKendaraan {
      * @param dateEnd string - The first period you want to get in DD-MM-YYYY
      */
 
-    async createReportMonitoringKendaraan(tanggal_mulai: string, tanggal_akhir: string, currentWeekNumber: number): Promise<string|false> {
+    async createReportLamaMuatByQty(tanggal_mulai: string, tanggal_akhir: string, monitoringKendaraanSheetId: string, currentWeekNumber: number): Promise<string|false> {
 
         try {
+            // make a copy
+            const newFilename = `Lama antri dan lama muat by quantity W${currentWeekNumber} tanggal ${tanggal_mulai} sampai dengan ${tanggal_akhir}`;
+            const spreadsheetId = await this.GdriveOperation.makeAcopyOfAFile(this.templateSpreadsheetIdLaporanMuatByQuantity, newFilename);
+            if(spreadsheetId && !spreadsheetId?.id) throw new Error("Tidak ada spreadsheet id")
+                // move file
+            await this.GdriveOperation.moveFileToFolder(spreadsheetId.id, this.folderIdLaporanMuatByQuantity)
+            
+            // get data from monitoring sheet
+            const getDataMonitoringKendaraan  = await this.GsheetOperation.getValuesOnSpreadsheet(monitoringKendaraanSheetId, "Worksheet!A:AM")
+            if(typeof getDataMonitoringKendaraan.data == 'string') throw new Error("Gagal mendapatkan data monitoring kendaraan");
+            
+            // filter data
+            const filterData = getDataMonitoringKendaraan.data.map((value) => [value[0], value[1], Number(value[2]), value[3], value[19], value[20], value[21], value[22], Number(value[11]), Number(value[15])])
+            const filterData2 = getDataMonitoringKendaraan.data.map((value) => [value[28], value[29], value[30], value[31]])
+            
+            // remove the first element array
+            filterData.shift();
+            filterData2.shift();
+            
+            const insertData1 = await this.GsheetOperation.setRangeValues(spreadsheetId.id, "database!B4:K", filterData);
+            if(insertData1.isSuccess === false) throw new Error("Tidak dapat memasukkan data bagian 1");
+            
+            const insertData2 = await this.GsheetOperation.setRangeValues(spreadsheetId.id, "database!L4:O", filterData2);
+            if(insertData2.isSuccess === false) throw new Error("Tidak dapat memasukkan data bagian 2");
+            
             const getData = await this.getData(tanggal_mulai, tanggal_akhir)
             
             if(typeof getData === 'string') throw new Error(getData);
-            if(!getData.length) throw new Error("Tidak ada data didapatkan (0)");
+            if(!getData.length) throw new Error("0 data didapatkan dari sistem");
             
             // remove the first array
             getData.shift();
 
-            const newFilename = `Laporan muat W${currentWeekNumber} ${tanggal_mulai} sampai dengan ${tanggal_akhir}`;
+            const insertData3 = await this.GsheetOperation.setRangeValues(spreadsheetId.id, "Worksheet!B4:N", getData);
+            if(insertData3.isSuccess === false) throw new Error("Gagal memasukkan data ke report lama muat by qty #3");
             
-            const spreadsheetId = await this.GdriveOperation.makeAcopyOfAFile(this.templateSpreadsheetIdMonitoringKendaraan, newFilename);
-            if(spreadsheetId && !spreadsheetId?.id) throw new Error("Tidak ada spreadsheet id")
-                // move file
-            await this.GdriveOperation.moveFileToFolder(spreadsheetId.id, this.folderIdMonitoringKendaraan)
-            
-            // insertdata
-            const filterData = getData.filter((val) => val[0] != 'GPACK');
-            const insertData = await this.GsheetOperation.setRangeValues(spreadsheetId.id, "Worksheet!A2:P", filterData)
-            if(insertData.isSuccess === false) throw new Error("Tidak dapat memasukkan data");
-    
-            this.spreadsheetIdMonitoringKendaraan = spreadsheetId.id;
-            this.sendResponse(`Berhasil membuat report monitoring kendaraan: https://docs.google.com/spreadsheets/d/${spreadsheetId.id}\n\n`)
+            this.sendResponse(`Berhasil membuat report lama muat by quantity: https://docs.google.com/spreadsheets/d/${spreadsheetId.id}\n\n`);
             return spreadsheetId.id;
+            
         } catch (error) {
-            this.sendResponse(JSON.stringify(error))
+            this.sendResponse("Gagal generate report lama muat by Qty" + JSON.stringify(error))
             return false;
         }
 
