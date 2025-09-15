@@ -19,6 +19,8 @@ export type sidepanelCommunication = "stb-run-hello-world"
                                 |'btc-absen-function'
                                 |"ctb-upah-bl"
                                 |'btc-upah-bl'
+                                |"ctb-antrian2-function"
+                                |'btc-antrian2-function'
 
 export interface messageCrossScriptGeneral {
     action: sidepanelCommunication,

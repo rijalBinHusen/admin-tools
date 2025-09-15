@@ -9,7 +9,6 @@ export class Gdrive {
      *
      * @param fileId   string - The ID of the file you want to move
      * @param folderId string - The ID of the destination folder
-     * @param token    string - A valid OAuth 2.0 access token with Drive scope
      * @returns        Promise<any> - The updated file resource with new parents
      */
     async moveFileToFolder(fileId: string, folderId: string): Promise<GoogleApiResult> {
@@ -76,4 +75,42 @@ export class Gdrive {
         }
     }
 
+    /**
+    * Make a copy of a Google Drive file
+    * 
+    * @param {string} fileId - The ID of the source file you want to copy
+    * @param {string} newFileName - The name for the copied file
+    * @returns {Promise<object>} - The created file resource (contains id, name, etc.)
+    */
+    async makeAcopyOfAFile(fileId: string, newFileName: string): Promise<object> {
+     try {
+       const url = `https://www.googleapis.com/drive/v3/files/${fileId}/copy`;
+   
+       const res = await fetch(url, {
+         method: "POST",
+         headers: {
+           "Authorization": `Bearer ${this.token}`, // 🔑 OAuth2 token
+           "Content-Type": "application/json"
+         },
+         body: JSON.stringify({
+           name: newFileName // New file name
+         })
+       });
+   
+       const data = await res.json();
+   
+       if (!res.ok) {
+         throw new Error(`Drive API error: ${data.error?.message}`);
+       }
+   
+       return data;
+     } catch (err) {
+       console.error("❌ Failed to copy file:", err);
+       throw err;
+     }
+   }
+   
+
 }
+
+export type GdriveType = InstanceType<typeof Gdrive>;
