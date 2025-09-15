@@ -1,9 +1,13 @@
 import { GoogleApiResult } from "../scripts_chrome.types";
-import { getAuthToken } from "./googleGetToken";
 
 export class Gdrive {
 
     private token = "";
+
+    constructor(token: string) {
+      this.token = token;
+    }
+
     /**
      * Move a Google Drive file into a target folder.
      *
@@ -13,9 +17,9 @@ export class Gdrive {
      */
     async moveFileToFolder(fileId: string, folderId: string): Promise<GoogleApiResult> {
         
-        if(this.token == "") this.token = await getAuthToken(true);
-
-        try {
+      try {
+      
+          if(this.token == "") throw new Error("Token unsetted");
             // 1. Fetch current parents of the file
             const metaRes = await fetch(
             `https://www.googleapis.com/drive/v3/files/${fileId}?fields=parents`,

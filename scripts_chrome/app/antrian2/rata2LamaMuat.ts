@@ -7,9 +7,8 @@ export class Antrian2Rata2LamaMuat {
     private GdriveOperation: GdriveType;
     private GsheetOperation: GSheetType
 
-    templateSpreadsheetIdRataRataLamaMuat = "16muHvCrVVYVLJX7RvsXC4g9EIOWs2p7KRJ9dCALMzhg";
-    folderIdRataRataLamaMuat = "1dQ0sr1mXS4htt-qGIv-4lD7-r6MoE5yh";
-    folderIdMonitoringKendaraan = "1DHhQxXnQj0Nc1EAJPAPDZdLhBxJ7zN1b";
+    private templateSpreadsheetIdRataRataLamaMuat = "16muHvCrVVYVLJX7RvsXC4g9EIOWs2p7KRJ9dCALMzhg";
+    private folderIdRataRataLamaMuat = "1dQ0sr1mXS4htt-qGIv-4lD7-r6MoE5yh";
     // folderIdMonitoringKendaraan = "1KBYwGvnd0G8JkL9z1Z6XE7wAiKS4P0Zi";
 
     private writeResponse: SendActionToBackground;
@@ -84,7 +83,7 @@ export class Antrian2Rata2LamaMuat {
             const spreadsheetId = await this.GdriveOperation.makeAcopyOfAFile(this.templateSpreadsheetIdRataRataLamaMuat, newFilename);
             if(spreadsheetId && !spreadsheetId?.id) throw new Error("Tidak ada spreadsheet id")
                 // move file
-            await this.GdriveOperation.moveFileToFolder(spreadsheetId.id, this.folderIdMonitoringKendaraan)
+            await this.GdriveOperation.moveFileToFolder(spreadsheetId.id, this.folderIdRataRataLamaMuat)
             
             // insertdata
             const insertData = await this.GsheetOperation.setRangeValues(spreadsheetId.id, "Worksheet!A2:L", getData)

@@ -3,10 +3,8 @@ import { SendActionToBackground, type spreadsheetResponse } from "../scripts_chr
 export class GoogleSpreadsheet {
 
   private token = "";
-  sendResponse: SendActionToBackground;
 
-  constructor (sendResponse: SendActionToBackground, token: string) {
-    this.sendResponse = sendResponse;
+  constructor (token: string) {
     this.token = token
   }
 

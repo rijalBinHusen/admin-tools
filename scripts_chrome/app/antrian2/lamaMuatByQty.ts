@@ -3,7 +3,7 @@ import { type SendActionToBackground } from "../../scripts_chrome.types";
 import { GdriveType } from "../../utils/googleDrive";
 import { GSheetType } from "../../utils/googleSpreadsheet";
 
-export class Antrian2MonitoringKendaraan {
+export class Antrian2LamaMuatByQty {
     private GdriveOperation: GdriveType;
     private GsheetOperation: GSheetType
 

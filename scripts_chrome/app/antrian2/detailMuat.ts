@@ -6,9 +6,8 @@ import { GSheetType } from "../../utils/googleSpreadsheet";
 
 export class Antrian2DetailMuat {
     
-    templateSpreadsheetIdLaporanDetailMuat = "1c-ffd6um6pNKxPVKhbpq9djBvAQBxi70N-_DVH21ryI";
-    folderIdLaporanDetailMuat = "1gstNp74BrpKwxCbu8VQKlhPKNbRH7wbi";
-    spreadsheetIdLaporanDetailMuat = "";
+    private templateSpreadsheetIdLaporanDetailMuat = "1c-ffd6um6pNKxPVKhbpq9djBvAQBxi70N-_DVH21ryI";
+    private folderIdLaporanDetailMuat = "1gstNp74BrpKwxCbu8VQKlhPKNbRH7wbi";
     // folderIdLaporanDetailMuat = "1KBYwGvnd0G8JkL9z1Z6XE7wAiKS4P0Zi";
     
     private GdriveOperation: GdriveType;
@@ -96,7 +95,6 @@ export class Antrian2DetailMuat {
             const insertData2 = await this.GsheetOperation.setRangeValues(copySpreadsheet.id, "Worksheet!A2:O", getData);
             if(insertData2.isSuccess === false) throw new Error("Gagal copy data ke report detail muat");
     
-            this.spreadsheetIdLaporanDetailMuat = copySpreadsheet.id;
             this.sendResponse(`Berhasil membuat report detail muat kendaraan: https://docs.google.com/spreadsheets/d/${copySpreadsheet.id}\n\n`)
             return copySpreadsheet.id
         } catch (error) {

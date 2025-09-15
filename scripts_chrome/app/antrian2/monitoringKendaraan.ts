@@ -7,10 +7,9 @@ export class Antrian2MonitoringKendaraan {
     private GdriveOperation: GdriveType;
     private GsheetOperation: GSheetType
 
-    templateSpreadsheetIdMonitoringKendaraan = "1A-77iD6HQM5tPQc_Pb2p526bvMtdkgLk-oL4Xsh1Pmc";
-    folderIdMonitoringKendaraan = "1DHhQxXnQj0Nc1EAJPAPDZdLhBxJ7zN1b";
-    // folderIdMonitoringKendaraan = "1KBYwGvnd0G8JkL9z1Z6XE7wAiKS4P0Zi";
-    spreadsheetIdMonitoringKendaraan = "";
+    private templateSpreadsheetIdMonitoringKendaraan = "1A-77iD6HQM5tPQc_Pb2p526bvMtdkgLk-oL4Xsh1Pmc";
+    private folderIdMonitoringKendaraan = "1DHhQxXnQj0Nc1EAJPAPDZdLhBxJ7zN1b";
+    // folderIdMonitoringKendaraan = "1KBYwGvnd0G8JkL9z1Z6XE7wAiKS4P0Zi"
 
     private writeResponse: SendActionToBackground;
 
@@ -92,11 +91,10 @@ export class Antrian2MonitoringKendaraan {
             const insertData = await this.GsheetOperation.setRangeValues(spreadsheetId.id, "Worksheet!A2:P", filterData)
             if(insertData.isSuccess === false) throw new Error("Tidak dapat memasukkan data");
     
-            this.spreadsheetIdMonitoringKendaraan = spreadsheetId.id;
             this.sendResponse(`Berhasil membuat report monitoring kendaraan: https://docs.google.com/spreadsheets/d/${spreadsheetId.id}\n\n`)
             return spreadsheetId.id;
         } catch (error) {
-            this.sendResponse(JSON.stringify(error))
+            this.sendResponse("Gagal generate report monitoring kendaraan" + JSON.stringify(error))
             return false;
         }
 
