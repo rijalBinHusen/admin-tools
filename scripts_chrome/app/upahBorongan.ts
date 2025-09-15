@@ -159,7 +159,7 @@ export class UpahBorongan {
             "body": `id_gd=${warehouseId}&tgl1=${dateStart}&tgl2=${dateEnd}&link=borongan`,
             "method": "POST",
             "mode": "cors",
-            "credentials": "omit"
+            "credentials": "include"
           });
 
           if(doGenerate.status == 302) {

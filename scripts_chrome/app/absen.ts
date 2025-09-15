@@ -1,4 +1,4 @@
-import { downloadAsFile, toSpreadsheetDate } from "../utils/tools";
+import { downloadAsFile, toSpreadsheetDate, getTableDataAsArray } from "../utils/tools";
 import { type SendActionToBackground, absenParameterFunction } from "../scripts_chrome.types";
 import { detectWorkingAndOverHours } from "./absenFunction"
 
@@ -55,7 +55,7 @@ export class Absen {
             return;
         }
         this.sendResponse(`Berhasil mendapatkan absen departemen ${departemenId} tanggal ${dateParameter}`)
-        const dataArray = this.getTableDataAsArray(table);
+        const dataArray = getTableDataAsArray(table);
         if(dataArray == null) {
             this.sendResponse(`Gagal memproses data, silahkan ulangi`)
             return;
@@ -96,47 +96,6 @@ export class Absen {
         }
         return result.join("\n");
     }
-    /**
-     * Selects an HTML table element and converts its data into a 2D array of strings.
-     * Each inner array represents a row, and contains the text content of its cells.
-     *
-     * @returns {string[][] | null} A 2D array of strings representing the table data,
-     * or null if the table element is not found.
-     */
-    private getTableDataAsArray(table: HTMLTableElement): string[][]|null {
-
-        if (!table) {
-            console.warn(`Table not found.`);
-            return null;
-        }
-
-        const tableData = <string[][]>[];
-
-        // Select all rows within the table, including header rows (if any) and body rows
-        // Using 'tr' selector covers both thead/tbody/tfoot rows.
-        const rows = table.querySelectorAll('tr');
-
-        rows.forEach(row => {
-            const rowData = <string[]>[];
-            // Select all cell elements within the current row (td for data cells, th for header cells)
-            const cells = row.querySelectorAll('th, td');
-
-            cells.forEach(cell => {
-                // Get the text content of the cell and trim whitespace
-                // @ts-ignore
-                rowData.push(cell?.textContent.trim());
-            });
-
-            // Only add non-empty rows to the tableData array
-            // This helps to skip rows that might just contain a single empty cell or no cells
-            if (rowData.length > 0) {
-                tableData.push(rowData);
-            }
-        });
-
-        return tableData;
-    }
-
     async startGetAbsen(parameter: absenParameterFunction) {
 
         if(this.isProcess) return;
