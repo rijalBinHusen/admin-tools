@@ -102,7 +102,7 @@ export class UpahBorongan {
 
     private async checkDifferentDockOnItem(upah: GetListUpahResponse): Promise<void> {
         // WH id tocheck 0, and 5
-        const idWhToCheck = ["0", "5"]
+        // const idWhToCheck = ["0", "5"]
 
         const listChecked = <ListUpahResponse[]>[];
         for(let d of upah.list) {
@@ -113,7 +113,7 @@ export class UpahBorongan {
                 const msg = `Harga upah tidak ditemukan\n\n${d.gudang} ${d.itemid}\n${d.nodo} harga ${d.price}`;
                 this.errorsChecker.push(msg);
             };
-            if(!idWhToCheck.includes(d.id_gd)) continue;
+            // if(!idWhToCheck.includes(d.id_gd)) continue;
             // check if data is valid
             const findIndex = listChecked.findIndex((rec) => rec.id_gd == d.id_gd && rec.itemid == d.itemid);
             // if date found
@@ -143,7 +143,7 @@ export class UpahBorongan {
                 continue;
             }
             // else generate upah
-            this.sendResponse("Menjalankan proses digenerate!")
+            this.sendResponse("Menjalankan proses generate!")
             await this.generateUpahBorongan(wh, parameter.dateStart, parameter.dateEnd);
         }
         this.sendResponse("Selesai generate upah")
