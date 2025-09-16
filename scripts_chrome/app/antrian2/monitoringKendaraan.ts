@@ -70,6 +70,8 @@ export class Antrian2MonitoringKendaraan {
 
     async createReportMonitoringKendaraan(tanggal_mulai: string, tanggal_akhir: string, currentWeekNumber: number): Promise<string|false> {
 
+        this.sendResponse("Generating monitoring kendaraan");
+
         try {
             const getData = await this.getData(tanggal_mulai, tanggal_akhir)
             

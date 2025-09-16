@@ -1,5 +1,4 @@
 import { type messageCrossScript, sidepanelCommunication } from "./scripts_chrome.types";
-import { GoogleSpreadsheet } from "./utils/googleSpreadsheet";
 
 // Handle messages from content script and side panel
 chrome.runtime.onMessage.addListener((message: messageCrossScript, sender, sendResponse) => {
@@ -8,15 +7,6 @@ chrome.runtime.onMessage.addListener((message: messageCrossScript, sender, sendR
   // Send message to content script to show hello world
   // do switch statement
   switch (message.action) {
-    case 'stb-run-hello-world':
-      forwardActionToContentTS('btc-run-hello-world');
-      break;
-    case 'ctb-run-hello-world':
-      forwardActionToSidePanel(message);
-      break;
-    case 'stb-get-spreadsheet-data':
-      getSpreadsheetData(message.data);
-      break;
     case 'stb-absen-function':
       forwardActionToContentTS('btc-absen-function', message.data);
       break;
@@ -28,6 +18,13 @@ chrome.runtime.onMessage.addListener((message: messageCrossScript, sender, sendR
       forwardActionToContentTS('btc-upah-bl', message.data);
       break;
     case 'ctb-upah-bl':
+      forwardActionToSidePanel(message);
+      break;
+    case 'stb-antrian2-function':
+      if(message)
+      forwardActionToContentTS('btc-antrian2-function', message.data);
+      break;
+    case 'ctb-antrian2-function':
       forwardActionToSidePanel(message);
       break;
     default:
@@ -76,19 +73,4 @@ function forwardActionToContentTS (yourActionName: sidepanelCommunication, data?
         }
       }
     });
-}
-
-async function getSpreadsheetData(url: string) {
-
-    let message = "Spreadsheet URL invalid" + url;
-
-    // if url valid, get data on spreadsheet, and overwrite message above
-    if(url) {
-
-      const sS = new GoogleSpreadsheet();
-      const getData = await sS.getValueOnSpreadsheet(url);
-      message = getData.data
-    }
-      
-    forwardActionToSidePanel({ action: "bts-get-spreadsheet-data", data: message });
 }

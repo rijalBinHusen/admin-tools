@@ -70,6 +70,7 @@ export class Antrian2Rata2LamaMuat {
 
     async createReportRata2LamaMuat(tanggal_mulai: string, tanggal_akhir: string, currentWeekNumber: number): Promise<string|false> {
 
+        this.sendResponse("Generating rata2 lama muat report");
         try {
             const getData = await this.getData(tanggal_mulai, tanggal_akhir)
             

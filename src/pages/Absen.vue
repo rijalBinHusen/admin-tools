@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-    import { ref, onMounted } from 'vue';
+    import { ref } from 'vue';
     import { type messageCrossScriptAbsen } from "../../scripts_chrome/scripts_chrome.types"
 
     const departements = [
@@ -25,24 +25,12 @@
     const datePick = ref('');
 
     function handleSubmit() {
-        messageFromContentJS.value.length = 0;
         // @ts-ignore
         chrome.runtime.sendMessage(<messageCrossScriptAbsen>{ action: 'stb-absen-function', data: {
             date: datePick.value,
             departements: departementSelected.value
         } });
     }
-
-    const messageFromContentJS = ref<string[]>([]);
-
-    onMounted(() => {
-        // @ts-ignore
-        chrome.runtime.onMessage.addListener((message:messageCrossScriptAbsen, sender, sendResponse) => {
-            if(message.action == 'bts-absen-function') {
-                messageFromContentJS.value.push(message.message + '')
-            }
-        });
-    })
 </script>
 
 <template>
@@ -64,16 +52,6 @@
         </div>
         <div>
             <input class="btn btn-b btn-sm smooth" type="submit" name="submit" id="submit" @click="handleSubmit">
-            <input 
-                v-if="messageFromContentJS.length"
-                class="btn btn-c btn-sm smooth" 
-                type="button" name="clear" id="clear" 
-                @click="messageFromContentJS.length = 0"
-                value="Clear message"
-            >
-        </div>
-        <div class="msg" v-if="messageFromContentJS.length">
-            <div style="color: black" v-for="msg of messageFromContentJS">{{ msg }}</div>
         </div>
     </div>
 </template>

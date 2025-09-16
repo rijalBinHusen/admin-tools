@@ -70,6 +70,8 @@ export class Antrian2LamaMuatByQty {
 
     async createReportLamaMuatByQty(tanggal_mulai: string, tanggal_akhir: string, currentWeekNumber: number, monitoringKendaraanSheetId: string, rata2LamaMuatSheetId: string): Promise<string|false> {
 
+        this.sendResponse("Generating report lama muat by Qty");
+
         try {
             // make a copy
             const newFilename = `Lama antri dan lama muat by quantity W${currentWeekNumber} tanggal ${tanggal_mulai} sampai dengan ${tanggal_akhir}`;

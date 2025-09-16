@@ -71,6 +71,8 @@ export class Antrian2DetailMuat {
 
     async createReportDetailMuat(tanggal_mulai: string, tanggal_akhir: string, monitoringKendaraanSheetId: string, currentWeekNumber: number) {
 
+        this.sendResponse("Generating detail muat report");
+        
         try {
             const getData = await this.getData(tanggal_mulai, tanggal_akhir)
             
