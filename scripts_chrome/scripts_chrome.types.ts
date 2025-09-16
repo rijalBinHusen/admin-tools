@@ -20,7 +20,7 @@ export type sidepanelCommunication = "stb-run-hello-world"
                                 |"ctb-upah-bl"
                                 |'btc-upah-bl'
                                 |"ctb-antrian2-function"
-                                |'btc-antrian2-function'
+                                |"btc-antrian2-function"
 
 export interface messageCrossScriptGeneral {
     action: sidepanelCommunication,
@@ -58,7 +58,8 @@ export interface messageCrossScriptAbsen {
 export type modeUpah = 'check'|'generate';
 
 export interface messageCrossScriptUpah {
-    action: 'stb-upah-bl' | 'btc-upah-bl' | 'bts-upah-bl',
+    action: 'stb-upah-bl' | 'btc-upah-bl' | 'bts-upah-bl'
+            | 'stb-antrian2-function' | 'btc-antrian2-function' | 'bts-antrian2-function',
     data: parameterPeriodStartEnd
     message?: string
 }

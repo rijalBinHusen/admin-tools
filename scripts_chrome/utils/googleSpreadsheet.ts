@@ -101,9 +101,10 @@ export class GoogleSpreadsheet {
    */
   async getLastRow(spreadsheetId: string, range: string): Promise<number> {
 
-    if(!this.token) throw new Error("Token unsetted")
-
+    
     try {
+      if(!this.token) throw new Error("Token unsetted")
+
       const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(range)}?majorDimension=ROWS`;
 
       const res = await fetch(url, {
@@ -141,8 +142,9 @@ export class GoogleSpreadsheet {
    */
   async setRangeValues(spreadsheetId: string, range: string, values: any[][]): Promise<spreadsheetResponse> {
 
-    if(!this.token) throw new Error("Token unsetted")
     try {
+      if(!this.token) throw new Error("Token unsetted")
+
       const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`;
 
       const res = await fetch(url, {
@@ -171,5 +173,73 @@ export class GoogleSpreadsheet {
       throw err;
     }
   }
+
+  /**
+   * Sort a spreadsheet range by given column indexes
+   *
+   * @param spreadsheetId    The ID of the spreadsheet
+   * @param sheetId          The numeric sheet ID (not name!)
+   * @param columnsIndex     Array of column indexes to sort by (0 = first column in sheet)
+   * @param startRow         Starting row index (0-based)
+   * @param startColumnIndex Starting column index (0-based)
+   * @param endColumnIndex   Ending column index (exclusive, 0-based)
+   */
+  async sortSpreadsheet(
+    spreadsheetId: string,
+    sheetId: number,
+    columnsIndex: number[],
+    startRow: number,
+    startColumnIndex: number,
+    endColumnIndex: number
+  ): Promise<void> {
+    try {
+      
+      if(!this.token) throw new Error("Token unsetted")
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}:batchUpdate`;
+
+      // Build sort specs for each column index
+      const sortSpecs = columnsIndex.map((colIndex) => ({
+        dimensionIndex: colIndex,
+        sortOrder: "ASCENDING" as const
+      }));
+
+      const body = {
+        requests: [
+          {
+            sortRange: {
+              range: {
+                sheetId: sheetId,
+                startRowIndex: startRow,
+                startColumnIndex: startColumnIndex,
+                endColumnIndex: endColumnIndex
+              },
+              sortSpecs: sortSpecs
+            }
+          }
+        ]
+      };
+
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(`Sheets API error: ${data.error?.message}`);
+      }
+
+      console.log("✅ Sort applied successfully:", data);
+    } catch (err) {
+      console.error("❌ Failed to sort spreadsheet:", err);
+      throw err;
+    }
+  }
+
 }
 export type GSheetType = InstanceType<typeof GoogleSpreadsheet>;

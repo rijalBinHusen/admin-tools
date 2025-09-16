@@ -7,8 +7,8 @@ export class Antrian2LamaMuatByQty {
     private GdriveOperation: GdriveType;
     private GsheetOperation: GSheetType
 
-    templateSpreadsheetIdLaporanMuatByQuantity = "1l_bLL_PjvoEAxIqQueG4RwOZufbHSTMQfiL-IXx-_DI";
-    folderIdLaporanMuatByQuantity = "1M1NoKPWzCAu4z8P44zpzCIpDYRCm454c";
+    private templateSpreadsheetIdLaporanMuatByQuantity = "1l_bLL_PjvoEAxIqQueG4RwOZufbHSTMQfiL-IXx-_DI";
+    private folderIdLaporanMuatByQuantity = "1M1NoKPWzCAu4z8P44zpzCIpDYRCm454c";
     // "1KBYwGvnd0G8JkL9z1Z6XE7wAiKS4P0Zi";
 
     private writeResponse: SendActionToBackground;
@@ -68,7 +68,7 @@ export class Antrian2LamaMuatByQty {
      * @param dateEnd string - The first period you want to get in DD-MM-YYYY
      */
 
-    async createReportLamaMuatByQty(tanggal_mulai: string, tanggal_akhir: string, monitoringKendaraanSheetId: string, currentWeekNumber: number): Promise<string|false> {
+    async createReportLamaMuatByQty(tanggal_mulai: string, tanggal_akhir: string, currentWeekNumber: number, monitoringKendaraanSheetId: string, rata2LamaMuatSheetId: string): Promise<string|false> {
 
         try {
             // make a copy
@@ -95,16 +95,12 @@ export class Antrian2LamaMuatByQty {
             
             const insertData2 = await this.GsheetOperation.setRangeValues(spreadsheetId.id, "database!L4:O", filterData2);
             if(insertData2.isSuccess === false) throw new Error("Tidak dapat memasukkan data bagian 2");
-            
-            const getData = await this.getData(tanggal_mulai, tanggal_akhir)
-            
-            if(typeof getData === 'string') throw new Error(getData);
-            if(!getData.length) throw new Error("0 data didapatkan dari sistem");
-            
-            // remove the first array
-            getData.shift();
 
-            const insertData3 = await this.GsheetOperation.setRangeValues(spreadsheetId.id, "Worksheet!B4:N", getData);
+            // get data from from rata2 lama muat
+            const getDataRata2LamaMuat  = await this.GsheetOperation.getValuesOnSpreadsheet(rata2LamaMuatSheetId, "Worksheet!A2:M")
+            if(typeof getDataRata2LamaMuat.data == 'string') throw new Error("Gagal mendapatkan data monitoring kendaraan");
+
+            const insertData3 = await this.GsheetOperation.setRangeValues(spreadsheetId.id, "Worksheet!B4:N", getDataRata2LamaMuat.data);
             if(insertData3.isSuccess === false) throw new Error("Gagal memasukkan data ke report lama muat by qty #3");
             
             this.sendResponse(`Berhasil membuat report lama muat by quantity: https://docs.google.com/spreadsheets/d/${spreadsheetId.id}\n\n`);
