@@ -7,6 +7,7 @@ export class Antrian2ContentJS {
     private detailMuatURL = "/antrian2/report/report_gudang"
     private monitoringKendaraanURL = "/antrian2/report/report_selesai"
     private rata2LamaMuatURL = "/antrian2/report/report_muat_qty"
+    private isProcess = false;
 
     constructor(funcToSendActionToBackground: SendActionToBackground) {
         this.writeResponse = funcToSendActionToBackground;
@@ -65,6 +66,16 @@ export class Antrian2ContentJS {
     async doGetData(param: messageCrossScript) {
         
         if(param.action !== 'btc-antrian2-function') return;
+        
+        if(this.isProcess) return;
+        this.isProcess = true;
+        
+        const isURLValid = window.location.host == '192.168.8.7:8080' || window.location.host == '182.16.186.138:8080'
+        if (!isURLValid) {
+            this.sendMessage("Anda tidak berada diaplikasi STT");
+            return;
+        }
+        this.sendMessage("Anda berada diaplikasi STT")
 
         this.sendMessage("Getting data on domain " + param.whatDomain);
         
