@@ -17,7 +17,7 @@ const pages = {
 type PageOption = keyof typeof pages;
 const currentPage = ref<PageOption>('stock')
 
-const menu = ['Absen', 'Upah borongan', 'Stock', 'Detail muat', 'Antrian report'] as const;
+const menu = ['Absen', 'Upah borongan', 'Antrian report', 'Stock'] as const;
 type MenuOption = typeof menu[number];
 
 function handleChangePages (page: MenuOption) {

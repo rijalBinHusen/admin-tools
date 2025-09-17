@@ -1,19 +1,39 @@
 <script lang="ts" setup>
-    import { ref } from 'vue';
+    import { onMounted, ref } from 'vue';
     import { type messageCrossScript } from "../../scripts_chrome/scripts_chrome.types"
+    import EventEmitter from "../utils/EventEmitter";
 
     const dateStart = ref('');
     const dateEnd = ref('');
 
-    function handleSubmit() {
-        // @ts-ignore
-        chrome.runtime.sendMessage(<messageCrossScript>{ action: 'stb-antrian2-function', data: {
-            dateEnd: dateEnd.value,
-            dateStart: dateStart.value,
-            },
-            whatDomain: 'detail-muat'
-        });
+    const eventEmitSubscribe = new EventEmitter();
+    const domains = ['detail-muat','monitoring-kendaraan', 'rata2-lama-muat']
+
+    async function handleSubmit() {
+        for (let domain of domains) {
+            
+            // @ts-ignore
+            chrome.runtime.sendMessage(<messageCrossScript>{ action: 'stb-antrian2-function', data: {
+                dateEnd: dateEnd.value,
+                dateStart: dateStart.value,
+                },
+                whatDomain: domain
+            });
+
+            const isSuccess = await eventEmitSubscribe.waitForEvent('next-step');
+            if(!isSuccess) return;
+        }
     }
+
+    onMounted(() => {
+        // @ts-ignore
+        chrome.runtime.onMessage.addListener((message: messageCrossScript, sender, sendResponse) => {
+        //   listen to end of response
+            if(message.action == 'end-response') {
+                eventEmitSubscribe.emit("next-step", message.isSuccess)
+            }
+        });
+    })
 </script>
 
 <template>

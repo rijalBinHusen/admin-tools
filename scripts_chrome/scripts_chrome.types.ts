@@ -23,6 +23,7 @@ export type messageCrossScript = BTSAction
                                     |CTBAction
                                     |CTBActionAntrian2
                                     |BTCAntrian2
+                                    |EndResponse
 
 export interface absenParameterFunction {
     date: string
@@ -75,4 +76,9 @@ interface BTCAntrian2 {
     action: 'btc-antrian2-function' | 'stb-antrian2-function'
     data: parameterPeriodStartEnd
     whatDomain: DomainAntrian2
+}
+
+interface EndResponse {
+    action: 'end-response'
+    isSuccess: boolean
 }

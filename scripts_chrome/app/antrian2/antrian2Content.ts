@@ -105,6 +105,7 @@ export class Antrian2ContentJS {
             
         } catch (error) {
             this.sendMessage("Gagal mendapatkan detail muat: " + error.message)
+            this.writeResponse({ action: 'end-response', isSuccess: false})
             return false;
         }
 
