@@ -1,4 +1,5 @@
-import { type messageCrossScript, sidepanelCommunication } from "./scripts_chrome.types";
+import { Antrian2BackgroundJS } from "./app/antrian2/antrian2Background";
+import { type messageCrossScript } from "./scripts_chrome.types";
 
 // Handle messages from content script and side panel
 chrome.runtime.onMessage.addListener((message: messageCrossScript, sender, sendResponse) => {
@@ -8,38 +9,38 @@ chrome.runtime.onMessage.addListener((message: messageCrossScript, sender, sendR
   // do switch statement
   switch (message.action) {
     case 'stb-absen-function':
-      forwardActionToContentTS('btc-absen-function', message.data);
+      backgroundToContent('btc-absen-function', message.data);
       break;
     case 'ctb-absen-function':
-      forwardActionToSidePanel(message);
+      toSidePanel(message);
       break;
     case 'stb-upah-bl':
       if(message)
-      forwardActionToContentTS('btc-upah-bl', message.data);
+      backgroundToContent('btc-upah-bl', message.data);
       break;
     case 'ctb-upah-bl':
-      forwardActionToSidePanel(message);
+      toSidePanel(message);
       break;
     case 'stb-antrian2-function':
       if(message)
-      forwardActionToContentTS('btc-antrian2-function', message.data);
+      backgroundToContent('btc-antrian2-function', message.data);
       break;
     case 'ctb-antrian2-function':
-      forwardActionToSidePanel(message);
+      const d = new Antrian2BackgroundJS(toSidePanel);
       break;
     default:
       break;
   }
 });
 
-function forwardActionToSidePanel(yourAction: messageCrossScript) {
+function toSidePanel(yourAction: messageCrossScript) {
   chrome.runtime.sendMessage({
     ...yourAction,
     action: yourAction.action.replace("ctb", "bts")
   })
 }
 
-function forwardActionToContentTS (yourActionName: sidepanelCommunication, data?: any) {
+function backgroundToContent (yourActionName: string, data?: any) {
   
   chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
       if (tabs[0]?.id) {
