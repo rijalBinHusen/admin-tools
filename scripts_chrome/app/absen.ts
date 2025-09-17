@@ -12,10 +12,10 @@ export class Absen {
         this.writeResponse = funcToSendActionToBackground;
     }
 
-    private sendResponse(message: string, data?: string) {
+    private sendResponse(message: string) {
         const currentTime = new Date();
         const messageToSend = `${currentTime.toLocaleTimeString()} | ${message}`
-        this.writeResponse({ action: "ctb-absen-function", message: messageToSend, data });
+        this.writeResponse({ action: "ctb-absen-function", message: messageToSend});
         // console.log(message, data)
     }
 
@@ -98,6 +98,7 @@ export class Absen {
     }
     async startGetAbsen(parameter: absenParameterFunction) {
 
+        
         if(this.isProcess) return;
         this.isProcess = true;
         

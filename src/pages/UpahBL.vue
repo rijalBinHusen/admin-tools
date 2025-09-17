@@ -1,6 +1,6 @@
 <script lang="ts" setup>
     import { ref } from 'vue';
-    import { type messageCrossScriptUpah, type modeUpah } from "../../scripts_chrome/scripts_chrome.types"
+    import { type messageCrossScript, type modeUpah } from "../../scripts_chrome/scripts_chrome.types"
 
     const dateStart = ref('');
     const dateEnd = ref('');
@@ -8,7 +8,7 @@
 
     function handleSubmit() {
         // @ts-ignore
-        chrome.runtime.sendMessage(<messageCrossScriptUpah>{ action: 'stb-upah-bl', data: {
+        chrome.runtime.sendMessage(<messageCrossScript>{ action: 'stb-upah-bl', data: {
             dateEnd: dateEnd.value,
             dateStart: dateStart.value,
             mode: mode.value

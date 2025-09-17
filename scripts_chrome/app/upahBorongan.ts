@@ -1,4 +1,4 @@
-import { type SendActionToBackground, parameterPeriodStartEnd} from "../scripts_chrome.types";
+import { type SendActionToBackground, messageCrossScript} from "../scripts_chrome.types";
 
 export class UpahBorongan {
     private warehouses = [1,2,3,4,5,6,7];
@@ -13,7 +13,7 @@ export class UpahBorongan {
     private sendResponse(message: string, data?: string) {
         const currentTime = new Date();
         const messageToSend = `${currentTime.toLocaleTimeString()} | ${message}`
-        this.writeResponse({ action: "ctb-upah-bl", message: messageToSend, data });
+        this.writeResponse({ action: "ctb-upah-bl", message: messageToSend });
         // console.log(message, data)
     }
 
@@ -57,7 +57,8 @@ export class UpahBorongan {
         }
     }
 
-    async runUpahFunction(parameter: parameterPeriodStartEnd) {
+    async runUpahFunction(parameter: messageCrossScript) {
+        if(parameter.action !== 'btc-upah-bl') return;
         
         // check is current tab === /finger/index.php/login // http://182.16.186.138:8080/
         const isURLValid = window.location.host == '192.168.8.7:8080' || window.location.host == '182.16.186.138:8080'
@@ -66,14 +67,19 @@ export class UpahBorongan {
             return;
         }
 
-        if(parameter.mode === 'check') this.getAndCheckUpah(parameter);
-        if(parameter.mode === 'generate') this.checkAndGenerate(parameter);
+        if(parameter.data.mode === 'check') this.getAndCheckUpah(parameter);
+        if(parameter.data.mode === 'generate') this.checkAndGenerate(parameter);
     }
 
-    private async getAndCheckUpah(parameter: parameterPeriodStartEnd) {
+    private async getAndCheckUpah(parameter: messageCrossScript) {
+        if(parameter.action !== 'btc-upah-bl') return;
+
         this.sendResponse("Mendapatkan dan memeriksa upah")
+
+        const dateStart = parameter.data.dateStart
+        const dateEnd = parameter.data.dateEnd
         for(let wh of this.warehouses) {
-            const getData = await this.getListUpahBeforeGenerate(wh, parameter.dateStart, parameter.dateEnd);
+            const getData = await this.getListUpahBeforeGenerate(wh, dateStart, dateEnd);
             if(!getData) continue;
 
             // check each data
@@ -131,20 +137,24 @@ export class UpahBorongan {
 
     }
 
-    private async checkAndGenerate(parameter: parameterPeriodStartEnd) {
+    private async checkAndGenerate(parameter: messageCrossScript) {
+        if(parameter.action !== 'btc-upah-bl') return;
 
         this.sendResponse("Memeriksa dan generate data upah")
         
+        const dateStart = parameter.data.dateStart
+        const dateEnd = parameter.data.dateEnd
+
         for(let wh of this.warehouses) {
             // check is wh is generated
-            const isWHGenerated = await this.checkIsUpahGenerated(wh, parameter.dateStart, parameter.dateEnd);
+            const isWHGenerated = await this.checkIsUpahGenerated(wh, dateStart, dateEnd);
             if(isWHGenerated) {
                 this.sendResponse("Seluruh upah telah digenerate!")
                 continue;
             }
             // else generate upah
             this.sendResponse("Menjalankan proses generate!")
-            await this.generateUpahBorongan(wh, parameter.dateStart, parameter.dateEnd);
+            await this.generateUpahBorongan(wh, dateStart, dateEnd);
         }
         this.sendResponse("Selesai generate upah")
     }
