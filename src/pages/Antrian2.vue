@@ -1,16 +1,17 @@
 <script lang="ts" setup>
     import { ref } from 'vue';
-    import { type parameterPeriodStartEnd } from "../../scripts_chrome/scripts_chrome.types"
+    import { type messageCrossScript } from "../../scripts_chrome/scripts_chrome.types"
 
     const dateStart = ref('');
     const dateEnd = ref('');
 
     function handleSubmit() {
         // @ts-ignore
-        chrome.runtime.sendMessage(<parameterPeriodStartEnd>{ action: 'stb-antrian2-function', data: {
+        chrome.runtime.sendMessage(<messageCrossScript>{ action: 'stb-antrian2-function', data: {
             dateEnd: dateEnd.value,
-            dateStart: dateStart.value
+            dateStart: dateStart.value,
             },
+            whatDomain: 'detail-muat'
         });
     }
 </script>

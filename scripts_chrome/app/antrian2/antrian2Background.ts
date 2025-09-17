@@ -7,12 +7,12 @@ import { getAuthToken } from "../../utils/googleGetToken";
 export class Antrian2BackgroundJS {
     
     private templateSpreadsheetIdLaporanDetailMuat = "1c-ffd6um6pNKxPVKhbpq9djBvAQBxi70N-_DVH21ryI";
-    private folderIdLaporanDetailMuat = "1gstNp74BrpKwxCbu8VQKlhPKNbRH7wbi";
-    // folderIdLaporanDetailMuat = "1KBYwGvnd0G8JkL9z1Z6XE7wAiKS4P0Zi";
     private templateSpreadsheetIdMonitoringKendaraan = "1A-77iD6HQM5tPQc_Pb2p526bvMtdkgLk-oL4Xsh1Pmc";
-    private folderIdMonitoringKendaraan = "1DHhQxXnQj0Nc1EAJPAPDZdLhBxJ7zN1b";
-    // 
     private templateSpreadsheetIdRataRataLamaMuat = "16muHvCrVVYVLJX7RvsXC4g9EIOWs2p7KRJ9dCALMzhg";
+    
+    private folderIdLaporanDetailMuat = "1KBYwGvnd0G8JkL9z1Z6XE7wAiKS4P0Zi";
+    // private folderIdLaporanDetailMuat = "1gstNp74BrpKwxCbu8VQKlhPKNbRH7wbi";
+    private folderIdMonitoringKendaraan = "1DHhQxXnQj0Nc1EAJPAPDZdLhBxJ7zN1b";
     private folderIdRataRataLamaMuat = "1dQ0sr1mXS4htt-qGIv-4lD7-r6MoE5yh";
     
     private GdriveOperation: GdriveType;
@@ -52,16 +52,18 @@ export class Antrian2BackgroundJS {
             // const newFilename = `Laporan detail muat gudang W${currentWeekNumber} ${tanggal_mulai} sampai dengan ${tanggal_akhir}`;
             const copySpreadsheet = await this.GdriveOperation.makeAcopyOfAFile(this.templateSpreadsheetIdLaporanDetailMuat, fileName);
             if(!copySpreadsheet.id ) throw new Error("Gagal make a copy of template");
+            this.sendResponseToSidePanel("Berhasil make a copy template detail muat");
             
             // movve file
             await this.GdriveOperation.moveFileToFolder(copySpreadsheet.id, this.folderIdLaporanDetailMuat)
-        
-            const insertData2 = await this.GsheetOperation.setRangeValues(copySpreadsheet.id, "Worksheet!A2:O", data);
+            
+            const insertData2 = await this.GsheetOperation.setRangeValues(copySpreadsheet.id, "Worksheet!A2:X", data);
             if(insertData2.isSuccess === false) throw new Error("Gagal copy data ke report detail muat");
+            this.sendResponseToSidePanel("Berhasil copy data ke spreadsheet");
     
             this.sendResponseToSidePanel(`Berhasil membuat report detail muat kendaraan: https://docs.google.com/spreadsheets/d/${copySpreadsheet.id}\n\n`)
         } catch (error) {
-            this.sendResponseToSidePanel("Gagal generate report detail muat: " + JSON.stringify(error))
+            this.sendResponseToSidePanel("Gagal generate report detail muat: " + error.message)
         }        
     }
 
@@ -78,7 +80,7 @@ export class Antrian2BackgroundJS {
             
             // insertdata
             const filterData = data.filter((val) => val[0] != 'GPACK');
-            const insertData = await this.GsheetOperation.setRangeValues(spreadsheetId.id, "Worksheet!A2:P", filterData)
+            const insertData = await this.GsheetOperation.setRangeValues(spreadsheetId.id, "Worksheet!A2:R", filterData)
             if(insertData.isSuccess === false) throw new Error("Tidak dapat memasukkan data");
     
             this.sendResponseToSidePanel(`Berhasil membuat report monitoring kendaraan: https://docs.google.com/spreadsheets/d/${spreadsheetId.id}\n\n`)
@@ -100,7 +102,7 @@ export class Antrian2BackgroundJS {
             await this.GdriveOperation.moveFileToFolder(spreadsheetId.id, this.folderIdRataRataLamaMuat)
             
             // insertdata
-            const insertData = await this.GsheetOperation.setRangeValues(spreadsheetId.id, "Worksheet!A2:L", data)
+            const insertData = await this.GsheetOperation.setRangeValues(spreadsheetId.id, "Worksheet!A2:M", data)
             if(insertData.isSuccess === false) throw new Error("Tidak dapat memasukkan data");
     
             this.sendResponseToSidePanel(`Berhasil membuat report rata rata lama muat kendaraan: https://docs.google.com/spreadsheets/d/${spreadsheetId.id}\n\n`)

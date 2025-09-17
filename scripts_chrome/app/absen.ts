@@ -1,5 +1,5 @@
 import { downloadAsFile, toSpreadsheetDate, getTableDataAsArray } from "../utils/tools";
-import { type SendActionToBackground, absenParameterFunction } from "../scripts_chrome.types";
+import { type SendActionToBackground, messageCrossScript } from "../scripts_chrome.types";
 import { detectWorkingAndOverHours } from "./absenFunction"
 
 export class Absen {
@@ -96,8 +96,10 @@ export class Absen {
         }
         return result.join("\n");
     }
-    async startGetAbsen(parameter: absenParameterFunction) {
+    async startGetAbsen(param: messageCrossScript) {
 
+        if(param.action !== 'btc-absen-function') return;
+        const parameter = param.data
         
         if(this.isProcess) return;
         this.isProcess = true;

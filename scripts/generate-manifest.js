@@ -12,13 +12,15 @@ const manifest = {
     "sidePanel",
     "scripting",
     "tabs",
-    "identity"
+    "identity",
+    "https://www.googleapis.com/"
   ],
   "oauth2": {
     "client_id": env.VITE_CLIENT_GOOGLE_ID || "",
     "scopes": [
       "https://www.googleapis.com/auth/spreadsheets",
-      "https://www.googleapis.com/auth/userinfo.email"
+      "https://www.googleapis.com/auth/userinfo.email",
+      "https://www.googleapis.com/auth/drive"
     ]
   },
   "host_permissions": [

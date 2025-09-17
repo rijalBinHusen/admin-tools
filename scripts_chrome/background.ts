@@ -5,33 +5,14 @@ import { type messageCrossScript } from "./scripts_chrome.types";
 chrome.runtime.onMessage.addListener((message: messageCrossScript, sender, sendResponse) => {
  
   // trigger from sidepanel
-  // Send message to content script to show hello world
-  // do switch statement
-  switch (message.action) {
-    case 'stb-absen-function':
-      backgroundToContent('btc-absen-function', message.data);
-      break;
-    case 'ctb-absen-function':
-      toSidePanel(message);
-      break;
-    case 'stb-upah-bl':
-      if(message)
-      backgroundToContent('btc-upah-bl', message.data);
-      break;
-    case 'ctb-upah-bl':
-      toSidePanel(message);
-      break;
-    case 'stb-antrian2-function':
-      if(message)
-      backgroundToContent('btc-antrian2-function', message.data);
-      break;
-    case 'ctb-antrian2-function':
+  if(message.action == 'ctb-antrian2-function') {
       const d = new Antrian2BackgroundJS(toSidePanel);
       d.generateReport(message)
-      break;
-    default:
-      break;
-  }
+  } 
+
+  else if(message.action.includes("ctb")) toSidePanel(message);
+  else if(message.action.includes("stb")) backgroundToContent(message);
+  
 });
 
 function toSidePanel(yourAction: messageCrossScript) {
@@ -41,15 +22,12 @@ function toSidePanel(yourAction: messageCrossScript) {
   })
 }
 
-function backgroundToContent (yourActionName: string, data?: any) {
+function backgroundToContent (param: messageCrossScript) {
   
   chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
       if (tabs[0]?.id) {
         try {
-          await chrome.tabs.sendMessage(tabs[0].id, {
-            action: yourActionName,
-            data
-          });
+          await chrome.tabs.sendMessage(tabs[0].id, { ...param, action: param.action.replace("stb", "btc")});
         } catch (error) {
           // If content script not ready, inject it and try again
           console.log('Content script not ready, injecting...');
@@ -61,10 +39,7 @@ function backgroundToContent (yourActionName: string, data?: any) {
             // Try sending message again after a short delay
             setTimeout(async () => {
               try {
-                await chrome.tabs.sendMessage(tabs[0].id!, {
-                  action: yourActionName,
-                  data
-                });
+                await chrome.tabs.sendMessage(tabs[0].id!, { ...param, action: param.action.replace("stb", "btc")});
               } catch (e) {
                 console.log('Still unable to connect to content script');
               }

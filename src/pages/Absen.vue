@@ -1,6 +1,6 @@
 <script lang="ts" setup>
     import { ref } from 'vue';
-    import { type messageCrossScriptAbsen } from "../../scripts_chrome/scripts_chrome.types"
+    import { type messageCrossScript } from "../../scripts_chrome/scripts_chrome.types"
 
     const departements = [
         { id: 240, name: " GUDANG PRODUK STAFF" },
@@ -26,7 +26,7 @@
 
     function handleSubmit() {
         // @ts-ignore
-        chrome.runtime.sendMessage(<messageCrossScriptAbsen>{ action: 'stb-absen-function', data: {
+        chrome.runtime.sendMessage(<messageCrossScript>{ action: 'stb-absen-function', data: {
             date: datePick.value,
             departements: departementSelected.value
         } });

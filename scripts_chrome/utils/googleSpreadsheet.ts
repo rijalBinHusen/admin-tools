@@ -145,7 +145,7 @@ export class GoogleSpreadsheet {
     try {
       if(!this.token) throw new Error("Token unsetted")
 
-      const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`;
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(range)}?valueInputOption=RAW`;
 
       const res = await fetch(url, {
         method: "PUT", // <-- PUT = overwrite the given range

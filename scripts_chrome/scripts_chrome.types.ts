@@ -43,7 +43,7 @@ interface STBActionAbsen {
 export type modeUpah = 'check'|'generate';
 
 interface STBActionParameterPeriodStartEnd {
-    action: 'stb-upah-bl' | 'stb-antrian2-function',
+    action: 'stb-upah-bl',
     data: parameterPeriodStartEnd
 }
 
@@ -72,7 +72,7 @@ interface BTCActionParameterPeriodStartEnd {
 }
 
 interface BTCAntrian2 {
-    action: 'btc-antrian2-function'
+    action: 'btc-antrian2-function' | 'stb-antrian2-function'
     data: parameterPeriodStartEnd
     whatDomain: DomainAntrian2
 }

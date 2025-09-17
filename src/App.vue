@@ -44,10 +44,10 @@ function handleChangePages (page: MenuOption) {
 
     onMounted(() => {
         // @ts-ignore
-        chrome.runtime.onMessage.addListener((message:messageCrossScriptAbsen, sender, sendResponse) => {
-            if(message.action == 'bts-absen-function') {
-                messageFromContentJS.value.push(message.message + '')
-            }
+        chrome.runtime.onMessage.addListener((message: messageCrossScriptAbsen, sender, sendResponse) => {
+
+          const isNeedToShow = message.action.includes("bts") || message.action == "send-message";
+          if(isNeedToShow) messageFromContentJS.value.push(message.message + '');
         });
     })
 

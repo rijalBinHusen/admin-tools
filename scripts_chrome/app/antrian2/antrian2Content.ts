@@ -44,7 +44,7 @@ export class Antrian2ContentJS {
             });
 
         if(doGetData.status != 200) return "Gagal mendapatkan data for the 1st time";
-
+        if(doGetData.redirected) return "Anda belum login aplikasi antrian"
         const responseString = await doGetData.text();
         const responseAsHTMLElemen = new DOMParser().parseFromString(responseString, "text/html");
         const table = responseAsHTMLElemen.querySelector("table");
@@ -104,7 +104,7 @@ export class Antrian2ContentJS {
             })
             
         } catch (error) {
-            this.sendMessage("Gagal mendapatkna detail muat: " + JSON.stringify(error))
+            this.sendMessage("Gagal mendapatkan detail muat: " + error.message)
             return false;
         }
 

@@ -7,11 +7,11 @@ chrome.runtime.onMessage.addListener( async (message: messageCrossScript, sender
   switch (message.action) {
     case 'btc-absen-function':
       const abs = new Absen(sendActionToBackground);
-      abs.startGetAbsen(message.data);
+      abs.startGetAbsen(message);
       break;
     case 'btc-upah-bl':
       const upahBL = new UpahBorongan(sendActionToBackground);
-      upahBL.runUpahFunction(message.data);
+      upahBL.runUpahFunction(message);
       break;
     case 'btc-antrian2-function':
       const antrian2 = new Antrian2ContentJS(sendActionToBackground);
