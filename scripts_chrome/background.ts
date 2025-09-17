@@ -27,6 +27,7 @@ chrome.runtime.onMessage.addListener((message: messageCrossScript, sender, sendR
       break;
     case 'ctb-antrian2-function':
       const d = new Antrian2BackgroundJS(toSidePanel);
+      d.generateReport(message)
       break;
     default:
       break;

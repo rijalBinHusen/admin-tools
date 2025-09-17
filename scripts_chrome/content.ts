@@ -1,15 +1,10 @@
 import { type messageCrossScript } from "./scripts_chrome.types";
 import { Absen } from "./app/absen";
 import { UpahBorongan } from "./app/upahBorongan";
-import { Antrian2 } from "./app/antrian2/indexAntrian2";
+import { Antrian2ContentJS } from "./app/antrian2/antrian2Content";
 
 chrome.runtime.onMessage.addListener( async (message: messageCrossScript, sender, sendResponse) => {
   switch (message.action) {
-    case 'btc-run-hello-world':
-      alert('Content script function executed!');
-      // reply message to background ts and forward to sidepanel
-      sendActionToBackground({ action: 'ctb-run-hello-world', data: 'Hello from content.js!' })
-      break;
     case 'btc-absen-function':
       const abs = new Absen(sendActionToBackground);
       abs.startGetAbsen(message.data);
@@ -19,8 +14,8 @@ chrome.runtime.onMessage.addListener( async (message: messageCrossScript, sender
       upahBL.runUpahFunction(message.data);
       break;
     case 'btc-antrian2-function':
-      const antrian2 = new Antrian2(sendActionToBackground);
-      antrian2.generateReport(message.data);
+      const antrian2 = new Antrian2ContentJS(sendActionToBackground);
+      antrian2.doGetData(message);
       break;
     default:
       break;
@@ -29,5 +24,5 @@ chrome.runtime.onMessage.addListener( async (message: messageCrossScript, sender
 });
 
 function sendActionToBackground (data: messageCrossScript) {
-  chrome.runtime.sendMessage({ action: data.action, data: data.data, message: data.message });
+  chrome.runtime.sendMessage(data);
 }

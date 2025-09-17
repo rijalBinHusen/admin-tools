@@ -9,6 +9,11 @@ export class Antrian2BackgroundJS {
     private templateSpreadsheetIdLaporanDetailMuat = "1c-ffd6um6pNKxPVKhbpq9djBvAQBxi70N-_DVH21ryI";
     private folderIdLaporanDetailMuat = "1gstNp74BrpKwxCbu8VQKlhPKNbRH7wbi";
     // folderIdLaporanDetailMuat = "1KBYwGvnd0G8JkL9z1Z6XE7wAiKS4P0Zi";
+    private templateSpreadsheetIdMonitoringKendaraan = "1A-77iD6HQM5tPQc_Pb2p526bvMtdkgLk-oL4Xsh1Pmc";
+    private folderIdMonitoringKendaraan = "1DHhQxXnQj0Nc1EAJPAPDZdLhBxJ7zN1b";
+    // 
+    private templateSpreadsheetIdRataRataLamaMuat = "16muHvCrVVYVLJX7RvsXC4g9EIOWs2p7KRJ9dCALMzhg";
+    private folderIdRataRataLamaMuat = "1dQ0sr1mXS4htt-qGIv-4lD7-r6MoE5yh";
     
     private GdriveOperation: GdriveType;
     private GsheetOperation: GSheetType;
@@ -32,7 +37,7 @@ export class Antrian2BackgroundJS {
         this.writeResponse({ action: 'bts-antrian2-function', message })
     }
 
-    async createReportDetailMuat(data: string[][], fileName: string) {
+    private async createReportDetailMuat(data: string[][], fileName: string) {
 
         this.sendResponseToSidePanel("data detail muat received total length: " + data.length);
         
@@ -60,6 +65,51 @@ export class Antrian2BackgroundJS {
         }        
     }
 
+    private async createReportMonitoringKendaraan(data: string[][], fileName: string): Promise<void> {
+
+        this.sendResponseToSidePanel("data monitoring kendaraan received total length: " + data.length);
+
+        try {
+            
+            const spreadsheetId = await this.GdriveOperation.makeAcopyOfAFile(this.templateSpreadsheetIdMonitoringKendaraan, fileName);
+            if(spreadsheetId && !spreadsheetId?.id) throw new Error("Tidak dapat make a copy of a file")
+            // move file
+            await this.GdriveOperation.moveFileToFolder(spreadsheetId.id, this.folderIdMonitoringKendaraan)
+            
+            // insertdata
+            const filterData = data.filter((val) => val[0] != 'GPACK');
+            const insertData = await this.GsheetOperation.setRangeValues(spreadsheetId.id, "Worksheet!A2:P", filterData)
+            if(insertData.isSuccess === false) throw new Error("Tidak dapat memasukkan data");
+    
+            this.sendResponseToSidePanel(`Berhasil membuat report monitoring kendaraan: https://docs.google.com/spreadsheets/d/${spreadsheetId.id}\n\n`)
+        } catch (error) {
+            this.sendResponseToSidePanel("Gagal generate report monitoring kendaraan" + JSON.stringify(error))
+        }
+
+    }
+
+    private async createReportRata2LamaMuat(data: string[][], fileName: string): Promise<void> {
+
+        this.sendResponseToSidePanel("data rata2 lama muat received total length: " + data.length);
+        
+        try {
+            
+            const spreadsheetId = await this.GdriveOperation.makeAcopyOfAFile(this.templateSpreadsheetIdRataRataLamaMuat, fileName);
+            if(spreadsheetId && !spreadsheetId?.id) throw new Error("Tidak dapat make a copy of file")
+                // move file
+            await this.GdriveOperation.moveFileToFolder(spreadsheetId.id, this.folderIdRataRataLamaMuat)
+            
+            // insertdata
+            const insertData = await this.GsheetOperation.setRangeValues(spreadsheetId.id, "Worksheet!A2:L", data)
+            if(insertData.isSuccess === false) throw new Error("Tidak dapat memasukkan data");
+    
+            this.sendResponseToSidePanel(`Berhasil membuat report rata rata lama muat kendaraan: https://docs.google.com/spreadsheets/d/${spreadsheetId.id}\n\n`)
+        } catch (error) {
+            this.sendResponseToSidePanel("Gagal generate report rata2 lama muat" + JSON.stringify(error))
+        }
+
+    }
+
     async generateReport(params: messageCrossScript) {
         // cancel it
         if(params.action != 'ctb-antrian2-function') return;
@@ -67,6 +117,14 @@ export class Antrian2BackgroundJS {
         await this.setUpGoogleAPI();
         if(params.whatDomain === 'detail-muat') {
             await this.createReportDetailMuat(params.data, params.spreadsheetFileName)
+        }
+        
+        if(params.whatDomain === 'monitoring-kendaraan') {
+            await this.createReportMonitoringKendaraan(params.data, params.spreadsheetFileName)
+        }
+
+        if(params.whatDomain === 'rata2-lama-muat') {
+            await this.createReportRata2LamaMuat(params.data, params.spreadsheetFileName)
         }
 
     }

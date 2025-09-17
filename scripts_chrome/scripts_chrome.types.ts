@@ -22,6 +22,7 @@ export type messageCrossScript = BTSAction
                                     |BTCActionParameterPeriodStartEnd
                                     |CTBAction
                                     |CTBActionAntrian2
+                                    |BTCAntrian2
 
 export interface absenParameterFunction {
     date: string
@@ -56,14 +57,22 @@ interface CTBAction {
     message: string
 }
 
+type DomainAntrian2 = 'detail-muat'|'monitoring-kendaraan'|'rata2-lama-muat';
+
 interface CTBActionAntrian2 {
     action: 'ctb-antrian2-function',
     data: string[][],
-    whatDomain: 'detail-muat'|'monitoring-kendaraan'|'rata2-lama-muat'
+    whatDomain: DomainAntrian2
     spreadsheetFileName: string
 }
 
 interface BTCActionParameterPeriodStartEnd {
-    action:  'btc-antrian2-function' | 'btc-upah-bl'
+    action: 'btc-upah-bl'
     data: parameterPeriodStartEnd
+}
+
+interface BTCAntrian2 {
+    action: 'btc-antrian2-function'
+    data: parameterPeriodStartEnd
+    whatDomain: DomainAntrian2
 }
