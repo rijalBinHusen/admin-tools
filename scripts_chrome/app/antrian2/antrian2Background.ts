@@ -4,6 +4,9 @@ import { GoogleSpreadsheet, GSheetType } from "../../utils/googleSpreadsheet";
 import { getAuthToken } from "../../utils/googleGetToken";
 
 let lamaMuatByQtySpreadsheetId = "";
+let monitoringKendaraanSpreadsheetId = "";
+let dataForMonitoringKendaraan:string[][] = [];
+let dataForReportLamaMuatByQtyFromRata2LamaMuat: string[][] = [];
 
 export class Antrian2BackgroundJS {
     
@@ -11,7 +14,6 @@ export class Antrian2BackgroundJS {
     private templateSpreadsheetIdMonitoringKendaraan = "1A-77iD6HQM5tPQc_Pb2p526bvMtdkgLk-oL4Xsh1Pmc";
     private templateSpreadsheetIdRataRataLamaMuat = "16muHvCrVVYVLJX7RvsXC4g9EIOWs2p7KRJ9dCALMzhg";
     private templateSpreadsheetIdLaporanMuatByQuantity = "1l_bLL_PjvoEAxIqQueG4RwOZufbHSTMQfiL-IXx-_DI";
-    
     
     // private folderIdLaporanMuatByQuantity = "1M1NoKPWzCAu4z8P44zpzCIpDYRCm454c";
     // private folderIdLaporanDetailMuat = "1gstNp74BrpKwxCbu8VQKlhPKNbRH7wbi";
@@ -48,22 +50,35 @@ export class Antrian2BackgroundJS {
 
     private async createReportDetailMuat(data: string[][], fileName: string) {
 
-        this.sendResponseToSidePanel("data detail muat received total length: " + data.length);
+        this.sendResponseToSidePanel("detail muat data: " + data.length + "row");
         
         try {
-            
             const copySpreadsheet = await this.GdriveOperation.makeAcopyOfAFile(this.templateSpreadsheetIdLaporanDetailMuat, fileName);
             if(!copySpreadsheet.id ) throw new Error("Gagal make a copy of template");
             this.sendResponseToSidePanel("Berhasil make a copy template detail muat");
+
+            const mappedData = data.map(row => {
+                // Create a copy of the row to avoid modifying the original array
+                const newRow = [...row];
+                
+                // Convert dates at indices 4, 5, 6, and 7
+                newRow[4] = this.convertDateFormat(newRow[4]);
+                newRow[5] = this.convertDateFormat(newRow[5]);
+                newRow[6] = this.convertDateFormat(newRow[6]);
+                newRow[7] = this.convertDateFormat(newRow[7]);
+                
+                return newRow;
+            });
             
+            dataForMonitoringKendaraan = mappedData.map((value) => [value[0], value[8], value[18]])
             // movve file
             await this.GdriveOperation.moveFileToFolder(copySpreadsheet.id, this.folderIdLaporanDetailMuat)
             
-            const insertData2 = await this.GsheetOperation.setRangeValues(copySpreadsheet.id, "Worksheet!A2:X", data);
+            const insertData2 = await this.GsheetOperation.setRangeValues(copySpreadsheet.id, "Worksheet!A2:X", mappedData);
             if(insertData2.isSuccess === false) throw new Error("Gagal copy data ke report detail muat");
             this.sendResponseToSidePanel("Berhasil copy data ke spreadsheet");
     
-            this.sendResponseToSidePanel(`Berhasil membuat report detail muat kendaraan: https://docs.google.com/spreadsheets/d/${copySpreadsheet.id}\n\n`)
+            this.sendResponseToSidePanel(`Detail muat kendaraan: https://docs.google.com/spreadsheets/d/${copySpreadsheet.id}\n\n`)
         } catch (error) {
             this.sendResponseToSidePanel("Gagal generate report detail muat: " + error.message)
         }        
@@ -71,7 +86,7 @@ export class Antrian2BackgroundJS {
 
     private async createReportMonitoringKendaraan(data: string[][], fileName: string): Promise<void> {
 
-        this.sendResponseToSidePanel("data monitoring kendaraan received total length: " + data.length);
+        this.sendResponseToSidePanel("Monitoring kendaraan data: " + data.length + " row");
 
         try {
             
@@ -79,13 +94,31 @@ export class Antrian2BackgroundJS {
             if(spreadsheetId && !spreadsheetId?.id) throw new Error("Tidak dapat make a copy of a file")
             // move file
             await this.GdriveOperation.moveFileToFolder(spreadsheetId.id, this.folderIdMonitoringKendaraan)
-            
-            // insertdata
             const filterData = data.filter((val) => val[0] != 'GPACK');
-            const insertData = await this.GsheetOperation.setRangeValues(spreadsheetId.id, "Worksheet!A2:R", filterData)
-            if(insertData.isSuccess === false) throw new Error("Tidak dapat memasukkan data");
+            
+            const mappedData = filterData.map(row => {
+                // Create a copy of the row to avoid modifying the original array
+                const newRow = [...row];
+                
+                // Convert dates at indices 4, 5, 6, and 7
+                newRow[4] = this.convertDateFormat(newRow[4]);
+                newRow[5] = this.convertDateFormat(newRow[5]);
+                newRow[6] = this.convertDateFormat(newRow[6]);
+                newRow[7] = this.convertDateFormat(newRow[7]);
+                
+                return newRow;
+            });
+            // insertdata
+            const insertData = await this.GsheetOperation.setRangeValues(spreadsheetId.id, "Worksheet!A2:R", mappedData)
+            if(insertData.isSuccess === false) throw new Error("Tidak dapat memasukkan data #1");
+
+            const insertData2 = await this.GsheetOperation.setRangeValues(spreadsheetId.id, "Sheet4!A5:C", dataForMonitoringKendaraan)
+            if(insertData2.isSuccess === false) throw new Error("Tidak dapat memasukkan data #2");
     
-            this.sendResponseToSidePanel(`Berhasil membuat report monitoring kendaraan: https://docs.google.com/spreadsheets/d/${spreadsheetId.id}\n\n`)
+            this.sendResponseToSidePanel(`Monitoring kendaraan: https://docs.google.com/spreadsheets/d/${spreadsheetId.id}\n\n`)
+
+            // empty the data
+            dataForMonitoringKendaraan = [];
         } catch (error) {
             this.sendResponseToSidePanel("Gagal generate report monitoring kendaraan" + JSON.stringify(error))
         }
@@ -94,7 +127,7 @@ export class Antrian2BackgroundJS {
 
     private async createReportRata2LamaMuat(data: string[][], fileName: string): Promise<void> {
 
-        this.sendResponseToSidePanel("data rata2 lama muat received total length: " + data.length);
+        this.sendResponseToSidePanel("rata2 lama muat data: " + data.length + " row");
         
         try {
             
@@ -103,17 +136,30 @@ export class Antrian2BackgroundJS {
                 // move file
             await this.GdriveOperation.moveFileToFolder(spreadsheetId.id, this.folderIdRataRataLamaMuat)
             
+            const mappedData = data.map(row => {
+                // Create a copy of the row to avoid modifying the original array
+                const newRow = [...row];
+                
+                // Convert dates at indices 4, 5, 6, and 7
+                newRow[4] = this.convertDateFormat(newRow[7]);
+                newRow[5] = this.convertDateFormat(newRow[8]);
+                newRow[6] = this.convertDateFormat(newRow[9]);
+                
+                return newRow;
+            });
+
             // insertdata
-            const insertData = await this.GsheetOperation.setRangeValues(spreadsheetId.id, "Worksheet!A2:M", data)
+            const insertData = await this.GsheetOperation.setRangeValues(spreadsheetId.id, "Worksheet!A2:M", mappedData)
             if(insertData.isSuccess === false) throw new Error("Tidak dapat memasukkan data");
     
-            this.sendResponseToSidePanel(`Berhasil membuat report rata rata lama muat kendaraan: https://docs.google.com/spreadsheets/d/${spreadsheetId.id}\n\n`)
+            dataForReportLamaMuatByQtyFromRata2LamaMuat = mappedData;
+            this.sendResponseToSidePanel(`Rata rata lama muat: https://docs.google.com/spreadsheets/d/${spreadsheetId.id}\n\n`)
         } catch (error) {
             this.sendResponseToSidePanel("Gagal generate report rata2 lama muat" + JSON.stringify(error))
         }
     }
 
-    private async createReportLamaMuatByQty(domain: string, data: string[][], newFilename: string) {
+    private async createReportLamaMuatByQty(newFilename: string) {
         const isSpreadsheetCreated = lamaMuatByQtySpreadsheetId != "";
 
         try {
@@ -125,25 +171,25 @@ export class Antrian2BackgroundJS {
                 // move file
                 await this.GdriveOperation.moveFileToFolder(spreadsheetId.id, this.folderIdLaporanMuatByQuantity)    
             }
+                
+            // get values from monitoring kendaraan
+            const getDataFromMonitoringKendaraan = await this.GsheetOperation.getValuesOnSpreadsheet(monitoringKendaraanSpreadsheetId, "Worksheet!A:AM")
+            // filter data
+            const filterData = getDataFromMonitoringKendaraan.data.map((value) => [value[0], value[1], Number(value[2]), value[3], value[19], value[20], value[21], value[22], Number(value[11]), Number(value[15])])
+            const filterData2 = getDataFromMonitoringKendaraan.data.map((value) => [value[28], value[29], value[30], value[31]])
             
-            if(domain == 'monitoring-kendaraan') {
-                
-                // filter data
-                const filterData = data.map((value) => [value[0], value[1], Number(value[2]), value[3], value[19], value[20], value[21], value[22], Number(value[11]), Number(value[15])])
-                const filterData2 = data.map((value) => [value[28], value[29], value[30], value[31]])
-                
-                const insertData1 = await this.GsheetOperation.setRangeValues(lamaMuatByQtySpreadsheetId, "database!B4:K", filterData);
-                if(insertData1.isSuccess === false) throw new Error("Tidak dapat memasukkan data bagian 1");
-                
-                const insertData2 = await this.GsheetOperation.setRangeValues(lamaMuatByQtySpreadsheetId, "database!L4:O", filterData2);
-                if(insertData2.isSuccess === false) throw new Error("Tidak dapat memasukkan data bagian 2");
-            }
+            // insert data
+            const insertData1 = await this.GsheetOperation.setRangeValues(lamaMuatByQtySpreadsheetId, "database!B4:K", filterData);
+            if(insertData1.isSuccess === false) throw new Error("Gagal memasukkan data ke report lama muat by qty #1");
+            
+            const insertData2 = await this.GsheetOperation.setRangeValues(lamaMuatByQtySpreadsheetId, "database!L4:O", filterData2);
+            if(insertData2.isSuccess === false) throw new Error("Gagal memasukkan data ke report lama muat by qty #2");
 
-            if(domain == 'rata2-lama-muat') {
-                const insertData3 = await this.GsheetOperation.setRangeValues(lamaMuatByQtySpreadsheetId, "Worksheet!B4:N", data);
-                if(insertData3.isSuccess === false) throw new Error("Gagal memasukkan data ke report lama muat by qty #3");
-            
-            }
+            const insertData3 = await this.GsheetOperation.setRangeValues(lamaMuatByQtySpreadsheetId, "Worksheet!B4:N", dataForReportLamaMuatByQtyFromRata2LamaMuat);
+            if(insertData3.isSuccess === false) throw new Error("Gagal memasukkan data ke report lama muat by qty #3");
+
+            // empty record
+            dataForReportLamaMuatByQtyFromRata2LamaMuat = [];
 
             this.sendResponseToSidePanel(`Berhasil membuat report lama muat by quantity: https://docs.google.com/spreadsheets/d/${lamaMuatByQtySpreadsheetId}`);
         } catch (error) {
@@ -168,7 +214,7 @@ export class Antrian2BackgroundJS {
 
             // for lama muat by qty
             let newFilename = `Lama antri dan lama muat by quantity ${params.spreadsheetFileName}`;
-            await this.createReportLamaMuatByQty(params.whatDomain, params.data, newFilename)
+            await this.createReportLamaMuatByQty(newFilename)
         }
         
         if(params.whatDomain === 'rata2-lama-muat') {
@@ -177,11 +223,20 @@ export class Antrian2BackgroundJS {
 
             // for lama muat by qty
             let newFilename = `Lama antri dan lama muat by quantity ${params.spreadsheetFileName}`;
-            await this.createReportLamaMuatByQty(params.whatDomain, params.data, newFilename)
+            await this.createReportLamaMuatByQty(newFilename)
         }
 
         // notify that process is Finished
         this.writeResponse({ action: 'end-response', isSuccess: true })
 
+    }
+
+    private convertDateFormat(dateString: string) {
+        // Split the date and time parts
+        const [datePart, timePart] = dateString.split(' ');
+        // Split the date part into year, month, and day
+        const [year, month, day] = datePart.split('-');
+        // Reassemble in the new format
+        return `${day}-${month}-${year} ${timePart}`;
     }
 }
