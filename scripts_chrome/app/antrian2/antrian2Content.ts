@@ -127,20 +127,18 @@ export class Antrian2ContentJS {
         startDate = startDateAsDate.toLocaleDateString("ID-id").split("/").join("-")
         endDate = endDateAsDate.toLocaleDateString("ID-id").split("/").join("-")
         weekNumber = getWeekNumber(startDateAsDate);
+        newFileName = `W${weekNumber} ${startDate} sampai dengan ${endDate}`;
 
         if(param.whatDomain === 'detail-muat') {
             url = this.detailMuatURL;
-            newFileName = `Laporan detail muat gudang W${weekNumber} ${startDate} sampai dengan ${endDate}`;
         }
 
         if(param.whatDomain === 'monitoring-kendaraan') {
             url = this.monitoringKendaraanURL;
-            newFileName = `Laporan muat W${weekNumber} ${startDate} sampai dengan ${endDate}`;
         }
 
         if(param.whatDomain === 'rata2-lama-muat') {
             url = this.rata2LamaMuatURL;
-            newFileName = `Laporan muat dengan total QTY W${weekNumber} ${startDate} sampai dengan ${endDate} rata rata lama muat`;
         }
 
         return {

@@ -3,18 +3,23 @@ import { Gdrive, GdriveType } from "../../utils/googleDrive";
 import { GoogleSpreadsheet, GSheetType } from "../../utils/googleSpreadsheet";
 import { getAuthToken } from "../../utils/googleGetToken";
 
+let lamaMuatByQtySpreadsheetId = "";
 
 export class Antrian2BackgroundJS {
     
     private templateSpreadsheetIdLaporanDetailMuat = "1c-ffd6um6pNKxPVKhbpq9djBvAQBxi70N-_DVH21ryI";
     private templateSpreadsheetIdMonitoringKendaraan = "1A-77iD6HQM5tPQc_Pb2p526bvMtdkgLk-oL4Xsh1Pmc";
     private templateSpreadsheetIdRataRataLamaMuat = "16muHvCrVVYVLJX7RvsXC4g9EIOWs2p7KRJ9dCALMzhg";
+    private templateSpreadsheetIdLaporanMuatByQuantity = "1l_bLL_PjvoEAxIqQueG4RwOZufbHSTMQfiL-IXx-_DI";
     
+    
+    // private folderIdLaporanMuatByQuantity = "1M1NoKPWzCAu4z8P44zpzCIpDYRCm454c";
     // private folderIdLaporanDetailMuat = "1gstNp74BrpKwxCbu8VQKlhPKNbRH7wbi";
     // private folderIdMonitoringKendaraan = "1DHhQxXnQj0Nc1EAJPAPDZdLhBxJ7zN1b";
     // private folderIdRataRataLamaMuat = "1dQ0sr1mXS4htt-qGIv-4lD7-r6MoE5yh";
     
     // =========================== test =================================== //
+    private folderIdLaporanMuatByQuantity = "1KBYwGvnd0G8JkL9z1Z6XE7wAiKS4P0Zi";
     private folderIdLaporanDetailMuat = "1KBYwGvnd0G8JkL9z1Z6XE7wAiKS4P0Zi";
     private folderIdMonitoringKendaraan = "1KBYwGvnd0G8JkL9z1Z6XE7wAiKS4P0Zi";
     private folderIdRataRataLamaMuat = "1KBYwGvnd0G8JkL9z1Z6XE7wAiKS4P0Zi";
@@ -47,13 +52,6 @@ export class Antrian2BackgroundJS {
         
         try {
             
-            // only get some column to insert to monitoring kendaraan;
-            // const dataToInsertToMonitoringKendaraang = getData.map((value) => [value[0], value[8], value[18]])
-            
-            // const insertData = await this.GsheetOperation.setRangeValues(monitoringKendaraanSheetId, "Sheet4!A5:C", dataToInsertToMonitoringKendaraang);
-            // if(insertData.isSuccess === false) throw new Error("Gagal memasukkan data ke monitoring muat");
-    
-            // const newFilename = `Laporan detail muat gudang W${currentWeekNumber} ${tanggal_mulai} sampai dengan ${tanggal_akhir}`;
             const copySpreadsheet = await this.GdriveOperation.makeAcopyOfAFile(this.templateSpreadsheetIdLaporanDetailMuat, fileName);
             if(!copySpreadsheet.id ) throw new Error("Gagal make a copy of template");
             this.sendResponseToSidePanel("Berhasil make a copy template detail muat");
@@ -113,7 +111,45 @@ export class Antrian2BackgroundJS {
         } catch (error) {
             this.sendResponseToSidePanel("Gagal generate report rata2 lama muat" + JSON.stringify(error))
         }
+    }
 
+    private async createReportLamaMuatByQty(domain: string, data: string[][], newFilename: string) {
+        const isSpreadsheetCreated = lamaMuatByQtySpreadsheetId != "";
+
+        try {
+            
+            if(!isSpreadsheetCreated) {
+                const spreadsheetId = await this.GdriveOperation.makeAcopyOfAFile(this.templateSpreadsheetIdLaporanMuatByQuantity, newFilename);
+                if(spreadsheetId && !spreadsheetId?.id) throw new Error("Tidak dapat make a copy of file")
+                lamaMuatByQtySpreadsheetId = spreadsheetId.id
+                // move file
+                await this.GdriveOperation.moveFileToFolder(spreadsheetId.id, this.folderIdLaporanMuatByQuantity)    
+            }
+            
+            if(domain == 'monitoring-kendaraan') {
+                
+                // filter data
+                const filterData = data.map((value) => [value[0], value[1], Number(value[2]), value[3], value[19], value[20], value[21], value[22], Number(value[11]), Number(value[15])])
+                const filterData2 = data.map((value) => [value[28], value[29], value[30], value[31]])
+                
+                const insertData1 = await this.GsheetOperation.setRangeValues(lamaMuatByQtySpreadsheetId, "database!B4:K", filterData);
+                if(insertData1.isSuccess === false) throw new Error("Tidak dapat memasukkan data bagian 1");
+                
+                const insertData2 = await this.GsheetOperation.setRangeValues(lamaMuatByQtySpreadsheetId, "database!L4:O", filterData2);
+                if(insertData2.isSuccess === false) throw new Error("Tidak dapat memasukkan data bagian 2");
+            }
+
+            if(domain == 'rata2-lama-muat') {
+                const insertData3 = await this.GsheetOperation.setRangeValues(lamaMuatByQtySpreadsheetId, "Worksheet!B4:N", data);
+                if(insertData3.isSuccess === false) throw new Error("Gagal memasukkan data ke report lama muat by qty #3");
+            
+            }
+
+            this.sendResponseToSidePanel(`Berhasil membuat report lama muat by quantity: https://docs.google.com/spreadsheets/d/${lamaMuatByQtySpreadsheetId}`);
+        } catch (error) {
+
+            this.sendResponseToSidePanel("Gagal generate report lama muat by Qty" + JSON.stringify(error.message))
+        }
     }
 
     async generateReport(params: messageCrossScript) {
@@ -122,15 +158,26 @@ export class Antrian2BackgroundJS {
 
         await this.setUpGoogleAPI();
         if(params.whatDomain === 'detail-muat') {
-            await this.createReportDetailMuat(params.data, params.spreadsheetFileName)
+            let fileNameToSet = `Laporan detail muat gudang ${params.spreadsheetFileName}`
+            await this.createReportDetailMuat(params.data, fileNameToSet)
         }
         
         if(params.whatDomain === 'monitoring-kendaraan') {
-            await this.createReportMonitoringKendaraan(params.data, params.spreadsheetFileName)
-        }
+            let fileNameToSet = `Laporan muat ${params.spreadsheetFileName}`;
+            await this.createReportMonitoringKendaraan(params.data, fileNameToSet)
 
+            // for lama muat by qty
+            let newFilename = `Lama antri dan lama muat by quantity ${params.spreadsheetFileName}`;
+            await this.createReportLamaMuatByQty(params.whatDomain, params.data, newFilename)
+        }
+        
         if(params.whatDomain === 'rata2-lama-muat') {
-            await this.createReportRata2LamaMuat(params.data, params.spreadsheetFileName)
+            let fileNameToSet = `Laporan muat dengan total QTY ${params.spreadsheetFileName} rata rata lama muat`;
+            await this.createReportRata2LamaMuat(params.data, fileNameToSet)
+
+            // for lama muat by qty
+            let newFilename = `Lama antri dan lama muat by quantity ${params.spreadsheetFileName}`;
+            await this.createReportLamaMuatByQty(params.whatDomain, params.data, newFilename)
         }
 
         // notify that process is Finished
