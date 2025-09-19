@@ -7,7 +7,8 @@
     const dateEnd = ref('');
 
     const eventEmitSubscribe = new EventEmitter();
-    const domains = ['detail-muat','monitoring-kendaraan', 'rata2-lama-muat']
+    // const domains = ['detail-muat','monitoring-kendaraan', 'rata2-lama-muat']
+    const domains = ['monitoring-kendaraan']
 
     async function handleSubmit() {
         for (let domain of domains) {

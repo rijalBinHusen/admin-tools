@@ -10,7 +10,7 @@ let dataForReportLamaMuatByQtyFromRata2LamaMuat: string[][] = [];
 
 export class Antrian2BackgroundJS {
     
-    private templateSpreadsheetIdLaporanDetailMuat = "1c-ffd6um6pNKxPVKhbpq9djBvAQBxi70N-_DVH21ryI";
+    private templateSpreadsheetIdLaporanDetailMuat = "1Pq19WP1bFBeoR25Vq2fiMfVo3hfFr10vwZWMZQghbOk";
     private templateSpreadsheetIdMonitoringKendaraan = "1A-77iD6HQM5tPQc_Pb2p526bvMtdkgLk-oL4Xsh1Pmc";
     private templateSpreadsheetIdRataRataLamaMuat = "16muHvCrVVYVLJX7RvsXC4g9EIOWs2p7KRJ9dCALMzhg";
     private templateSpreadsheetIdLaporanMuatByQuantity = "1l_bLL_PjvoEAxIqQueG4RwOZufbHSTMQfiL-IXx-_DI";
@@ -62,6 +62,8 @@ export class Antrian2BackgroundJS {
                 const newRow = [...row];
                 
                 // Convert dates at indices 4, 5, 6, and 7
+                newRow[1] = this.convertDateFormat(newRow[1]);
+                newRow[2] = this.convertDateFormat(newRow[2]);
                 newRow[4] = this.convertDateFormat(newRow[4]);
                 newRow[5] = this.convertDateFormat(newRow[5]);
                 newRow[6] = this.convertDateFormat(newRow[6]);
@@ -171,12 +173,15 @@ export class Antrian2BackgroundJS {
                 // move file
                 await this.GdriveOperation.moveFileToFolder(spreadsheetId.id, this.folderIdLaporanMuatByQuantity)    
             }
+
+            if(!monitoringKendaraanSpreadsheetId) throw new Error("Monitoring kendaraan belum generate report");
                 
             // get values from monitoring kendaraan
             const getDataFromMonitoringKendaraan = await this.GsheetOperation.getValuesOnSpreadsheet(monitoringKendaraanSpreadsheetId, "Worksheet!A:AM")
+            if( typeof getDataFromMonitoringKendaraan == 'string' ) throw new Error(getDataFromMonitoringKendaraan);
             // filter data
-            const filterData = getDataFromMonitoringKendaraan.data.map((value) => [value[0], value[1], Number(value[2]), value[3], value[19], value[20], value[21], value[22], Number(value[11]), Number(value[15])])
-            const filterData2 = getDataFromMonitoringKendaraan.data.map((value) => [value[28], value[29], value[30], value[31]])
+            const filterData = getDataFromMonitoringKendaraan.values.map((value) => [value[0], value[1], Number(value[2]), value[3], value[19], value[20], value[21], value[22], Number(value[11]), Number(value[15])])
+            const filterData2 = getDataFromMonitoringKendaraan.values.map((value) => [value[28], value[29], value[30], value[31]])
             
             // insert data
             const insertData1 = await this.GsheetOperation.setRangeValues(lamaMuatByQtySpreadsheetId, "database!B4:K", filterData);

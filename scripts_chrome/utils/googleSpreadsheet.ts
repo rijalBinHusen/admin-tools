@@ -1,4 +1,4 @@
-import { SendActionToBackground, type spreadsheetResponse } from "../scripts_chrome.types";
+import { type spreadsheetResponse } from "../scripts_chrome.types";
 
 export class GoogleSpreadsheet {
 
@@ -8,11 +8,8 @@ export class GoogleSpreadsheet {
     this.token = token
   }
 
-  async getValuesOnSpreadsheet(spreadsheetId: string, range: string): Promise<spreadsheetResponse> {
-    if(!spreadsheetId || !range) return {
-      data: "Spreadsheet Id and range invalid",
-      isSuccess: false
-    }
+  async getValuesOnSpreadsheet(spreadsheetId: string, range: string): Promise<SheetsApiResponse|string> {
+    if(!spreadsheetId || !range) throw new Error("Spreadhsset or range id unsetted");
 
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}`;
 
@@ -31,17 +28,11 @@ export class GoogleSpreadsheet {
       );
       const data = await response.json();
       
-      return {
-        isSuccess: true,
-        data: data
-      }
+      return data
 
     } catch (err) {
       
-      return {
-        isSuccess: false,
-        data: JSON.stringify(err)
-      }
+      return "Failed to get values on spreadsheet";
     }
   }
 
@@ -145,7 +136,7 @@ export class GoogleSpreadsheet {
     try {
       if(!this.token) throw new Error("Token unsetted")
 
-      const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(range)}?valueInputOption=RAW`;
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`;
 
       const res = await fetch(url, {
         method: "PUT", // <-- PUT = overwrite the given range
@@ -243,3 +234,9 @@ export class GoogleSpreadsheet {
 
 }
 export type GSheetType = InstanceType<typeof GoogleSpreadsheet>;
+
+interface SheetsApiResponse {
+  range: string;
+  majorDimension: string;
+  values: (string | number | boolean)[][];
+}

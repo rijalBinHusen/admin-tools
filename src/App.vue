@@ -66,7 +66,7 @@ function handleChangePages (page: MenuOption) {
         value="Clear message"
     >
     <div class="msg" v-if="messageFromContentJS.length">
-        <div style="color: black" v-for="msg of messageFromContentJS">{{ msg }}</div>
+        <div style="word-break: break-all;color: black;overflow-wrap: break-word;width: 95%;" v-for="msg of messageFromContentJS">{{ msg }}</div>
     </div>
   </div>
 </template>
