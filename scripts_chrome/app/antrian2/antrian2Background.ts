@@ -218,8 +218,8 @@ export class Antrian2BackgroundJS {
             await this.createReportMonitoringKendaraan(params.data, fileNameToSet)
 
             // for lama muat by qty
-            let newFilename = `Lama antri dan lama muat by quantity ${params.spreadsheetFileName}`;
-            await this.createReportLamaMuatByQty(newFilename)
+            // let newFilename = `Lama antri dan lama muat by quantity ${params.spreadsheetFileName}`;
+            // await this.createReportLamaMuatByQty(newFilename)
         }
         
         if(params.whatDomain === 'rata2-lama-muat') {
@@ -227,8 +227,8 @@ export class Antrian2BackgroundJS {
             await this.createReportRata2LamaMuat(params.data, fileNameToSet)
 
             // for lama muat by qty
-            let newFilename = `Lama antri dan lama muat by quantity ${params.spreadsheetFileName}`;
-            await this.createReportLamaMuatByQty(newFilename)
+            // let newFilename = `Lama antri dan lama muat by quantity ${params.spreadsheetFileName}`;
+            // await this.createReportLamaMuatByQty(newFilename)
         }
 
         // notify that process is Finished
@@ -242,6 +242,6 @@ export class Antrian2BackgroundJS {
         // Split the date part into year, month, and day
         const [year, month, day] = datePart.split('-');
         // Reassemble in the new format
-        return `${day}-${month}-${year} ${timePart}`;
+        return `${month}-${day}-${year} ${timePart}`;
     }
 }
