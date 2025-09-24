@@ -1,6 +1,6 @@
 import { type messageCrossScript } from "./scripts_chrome.types";
 import { Absen } from "./app/absen";
-import { UpahBorongan } from "./app/upahBorongan";
+import { UpahBorongan } from "./app/warehouses/upahBorongan";
 import { Antrian2ContentJS } from "./app/antrian2/antrian2Content";
 
 chrome.runtime.onMessage.addListener( async (message: messageCrossScript, sender, sendResponse) => {
