@@ -82,3 +82,13 @@ interface EndResponse {
     action: 'end-response'
     isSuccess: boolean
 }
+
+
+export interface GoodsIssueResult {
+    date: string,
+    shift: number,
+    warehouse: string
+    itemCode: string
+    expiredDate: string
+    qty: number
+}
