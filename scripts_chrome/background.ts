@@ -8,7 +8,9 @@ chrome.runtime.onMessage.addListener((message: messageCrossScript, sender, sendR
   if(message.action == 'ctb-antrian2-function') {
       const d = new Antrian2BackgroundJS(toSidePanel);
       d.generateReport(message)
-  } 
+  } else if(message.action === 'ctb-goods-issue') {
+    
+  }
 
   else if(message.action.includes("ctb")) toSidePanel(message);
   else if(message.action.includes("stb")) backgroundToContent(message);

@@ -24,6 +24,7 @@ export type messageCrossScript = BTSAction
                                     |CTBActionAntrian2
                                     |BTCAntrian2
                                     |EndResponse
+                                    |CTBGoodsIssue
 
 export interface absenParameterFunction {
     date: string
@@ -83,6 +84,11 @@ interface EndResponse {
     isSuccess: boolean
 }
 
+interface CTBGoodsIssue {
+    action: 'ctb-goods-issue'
+    data: GoodsIssueResult[]
+}
+
 
 export interface GoodsIssueResult {
     date: string,
@@ -90,5 +96,6 @@ export interface GoodsIssueResult {
     warehouse: string
     itemCode: string
     expiredDate: string
+    jamMuat: string
     qty: number
 }

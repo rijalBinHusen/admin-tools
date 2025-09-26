@@ -8,10 +8,10 @@ class GoodsIsue {
         this.writeResponse = funcToSendActionToBackground;
     }
 
-    private sendResponse(message: string, data?: string) {
+    private sendResponse(message: string) {
         const currentTime = new Date();
         const messageToSend = `${currentTime.toLocaleTimeString()} | ${message}`
-        this.writeResponse({ action: "ctb-goods-issue", message: messageToSend });
+        this.writeResponse({ action: "send-message", message: messageToSend });
         // console.log(message, data)
     }
 
@@ -55,7 +55,7 @@ class GoodsIsue {
      * @returns        Promise<string|array> - The updated file resource with new parents
      */
 
-    async getOutputData(dateStart: string, dateEnd: string) {
+    async getOutputData(dateStart: string, dateEnd: string): Promise<GoodsIssueResult[]|void> {
         try {
             const data = await this.getAndSortData(dateStart, dateEnd);
             if(typeof data === 'string') throw new Error(data)
@@ -84,12 +84,15 @@ class GoodsIsue {
                         expiredDate,
                         itemCode,
                         qty,
-                        warehouse: d.locationid.substring(0, 4)
+                        warehouse: d.locationid.substring(0, 4),
+                        jamMuat: d.jam_muat
                     })
                 }
             }
+
+            this.writeResponse({action: "ctb-goods-issue", data: resultToReturn})
         } catch (error) {
-            
+            this.sendResponse("Gagal mendapatkan output:" + error.message )
         }
     }
 
