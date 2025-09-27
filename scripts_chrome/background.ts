@@ -1,5 +1,6 @@
 import { Antrian2BackgroundJS } from "./app/antrian2/antrian2Background";
 import { type messageCrossScript } from "./scripts_chrome.types";
+import { GoodsIssue } from "./app/warehouses/goodsIssues/goodsIsueBackground";
 
 // Handle messages from content script and side panel
 chrome.runtime.onMessage.addListener((message: messageCrossScript, sender, sendResponse) => {
@@ -9,7 +10,8 @@ chrome.runtime.onMessage.addListener((message: messageCrossScript, sender, sendR
       const d = new Antrian2BackgroundJS(toSidePanel);
       d.generateReport(message)
   } else if(message.action === 'ctb-goods-issue') {
-    
+      const e = new GoodsIssue(toSidePanel)
+      e.insertData(message)
   }
 
   else if(message.action.includes("ctb")) toSidePanel(message);

@@ -25,6 +25,7 @@ export type messageCrossScript = BTSAction
                                     |BTCAntrian2
                                     |EndResponse
                                     |CTBGoodsIssue
+                                    |STBActionOnly
 
 export interface absenParameterFunction {
     date: string
@@ -87,6 +88,10 @@ interface EndResponse {
 interface CTBGoodsIssue {
     action: 'ctb-goods-issue'
     data: GoodsIssueResult[]
+}
+
+interface STBActionOnly {
+    action: 'stb-goods-issue'
 }
 
 

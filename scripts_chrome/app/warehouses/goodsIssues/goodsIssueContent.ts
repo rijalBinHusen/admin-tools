@@ -1,6 +1,6 @@
-import { type SendActionToBackground, GoodsIssueResult } from "../../scripts_chrome.types";
+import { type SendActionToBackground, GoodsIssueResult } from "../../../scripts_chrome.types";
 
-class GoodsIsue {
+export class GoodsIsueContent {
     
     private writeResponse: SendActionToBackground;
 
