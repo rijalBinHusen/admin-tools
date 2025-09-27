@@ -11,7 +11,7 @@
     <div class="row">
         <div class="col c12">
             <h2>Dapatkan produk keluar</h2>
-            <input class="btn btn-b btn-sm smooth" type="submit" name="submit" id="submit" @click="handleSubmit">
+            <input class="btn btn-b btn-sm smooth" value="Dapatkan" type="submit" name="submit" id="submit" @click="handleSubmit">
         </div>
     </div>
 </template>

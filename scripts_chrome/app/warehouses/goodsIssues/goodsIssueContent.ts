@@ -43,21 +43,23 @@ export class GoodsIsueContent {
             
         } catch (error) {
             
-            return "Error mendapatkan barang keluar "+ error.message
+            return error.message
         }
     }
 
     /**
      * Get data from sistem.
      *
-     * @param dateStart string - The first period you want to get in DD-MM-YYYY
-     * @param dateEnd string - The first period you want to get in DD-MM-YYYY
+     * @param dateStart string - The first period you want to get in YYYY-MM-DD
+     * @param dateEnd string - The first period you want to get in YYYY-MM-DD
      * @returns        Promise<string|array> - The updated file resource with new parents
      */
 
-    async getOutputData(dateStart: string, dateEnd: string): Promise<GoodsIssueResult[]|void> {
+    async getOutputData(): Promise<void> {
+        this.sendResponse("Mendapatkan data output")
+        const d = this.getDate();
         try {
-            const data = await this.getAndSortData(dateStart, dateEnd);
+            const data = await this.getAndSortData(d.dateStart, d.dateEnd);
             if(typeof data === 'string') throw new Error(data)
             
             let resultToReturn: GoodsIssueResult[]=[]
@@ -94,6 +96,23 @@ export class GoodsIsueContent {
         } catch (error) {
             this.sendResponse("Gagal mendapatkan output:" + error.message )
         }
+    }
+
+    private getDate() {
+        const currentDate = new Date();
+        const currentHour = currentDate.getHours();
+        // is no need to fetch
+        // if clock < 11 make date as yesterday, else today
+        if (currentHour < 7) currentDate.setDate(currentDate.getDate() - 1);
+        // else do nothing
+
+        // ================================ normal date
+        const date = new Date();
+        return {
+            dateStart: `${currentDate.getFullYear()}-${currentDate.getMonth() +1}-${currentDate.getDate()}`,
+            dateEnd: `${date.getFullYear()}-${date.getMonth() +1}-${date.getDate()}`
+        }
+
     }
 
     private convertToDateAndShift(d: Date) {

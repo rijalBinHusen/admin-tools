@@ -32,7 +32,7 @@ export class GoogleSpreadsheet {
 
     } catch (err) {
       
-      return "Failed to get values on spreadsheet";
+      throw new Error("Failed to get values on spreadsheet" + err.message);
     }
   }
 

@@ -91,7 +91,7 @@ interface CTBGoodsIssue {
 }
 
 interface STBActionOnly {
-    action: 'stb-goods-issue'
+    action: 'stb-goods-issue'|'btc-goods-issue'
 }
 
 

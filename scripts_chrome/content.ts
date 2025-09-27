@@ -18,6 +18,10 @@ chrome.runtime.onMessage.addListener( async (message: messageCrossScript, sender
       const antrian2 = new Antrian2ContentJS(sendActionToBackground);
       antrian2.doGetData(message);
       break;
+    case 'btc-goods-issue':
+      const g = new GoodsIsueContent(sendActionToBackground);
+      g.getOutputData();
+      break;
     default:
       break;
   }

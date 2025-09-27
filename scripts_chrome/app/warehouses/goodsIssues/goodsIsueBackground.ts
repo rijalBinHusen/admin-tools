@@ -15,7 +15,9 @@ export class GoodsIssue {
     }
 
     private async sendMessageToSidePanel(message: string) {
-        this.writeResponse({ action: 'send-message', message })
+        const currentTime = new Date();
+        const messageToSend = `${currentTime.toLocaleTimeString()} | ${message}`
+        this.writeResponse({ action: 'send-message', message: messageToSend })
     }
     
     private async setUpGoogleAPI () {
@@ -26,7 +28,7 @@ export class GoodsIssue {
     }
 
     private async getCheckerBeforeUpdate(): Promise<Checker|void> {
-        if(!this.isGoogleAPIReady) this.setUpGoogleAPI();
+        if(!this.isGoogleAPIReady) await this.setUpGoogleAPI();
         try {
             const range = "Lock!A2:B2";
             const data = await this.GsheetOperation.getValuesOnSpreadsheet(
@@ -45,15 +47,30 @@ export class GoodsIssue {
         }
     }
     
-    private async setSpreadsheetThatWeAreInProgress() {
-        if(!this.isGoogleAPIReady) this.setUpGoogleAPI();
+    private async setSpreadsheetThatWeAreInProgress(progress: 0|1) {
+        if(!this.isGoogleAPIReady) await this.setUpGoogleAPI();
         try {
             
             const range = "Lock!B2";
             await this.GsheetOperation.setRangeValues(
                 this.spreadsheetId,
                 range,
-                [[1]]
+                [[progress]]
+            )
+        } catch (error) {
+            this.sendMessageToSidePanel(error.message)
+        }
+    }
+
+    private async setSpreadsheetValueLastTimePushed(time: number) {
+        if(!this.isGoogleAPIReady) await this.setUpGoogleAPI();
+        try {
+            
+            const range = "Lock!A2";
+            await this.GsheetOperation.setRangeValues(
+                this.spreadsheetId,
+                range,
+                [[time]]
             )
         } catch (error) {
             this.sendMessageToSidePanel(error.message)
@@ -62,6 +79,8 @@ export class GoodsIssue {
 
     async insertData(message: messageCrossScript) {
         if(message.action !== 'ctb-goods-issue') return;
+        if(!this.isGoogleAPIReady) await this.setUpGoogleAPI();
+        this.sendMessageToSidePanel("Memasukkan data kedalam spreadsheet")
         try {
             
             // get last record time pushed
@@ -72,17 +91,25 @@ export class GoodsIssue {
                 throw new Error("Terdapat proses insert data dari user lain")
             }
             // set that are we're do a progress
-            await this.setSpreadsheetThatWeAreInProgress();
+            await this.setSpreadsheetThatWeAreInProgress(1);
             
             // filter data where record.time > lastRecordTimePushed
             const dataToSet = message.data.filter((rec) => new Date(rec.jamMuat).getTime() > lastUpdate.lastUpdated)
                                             .map((rec) => ([rec.date, rec.shift, rec.warehouse, rec.itemCode, rec.expiredDate, rec.qty]));
+            if(!dataToSet.length) throw new Error("Tidak ada output terbaru");
+            
             // get last row
             const lastRow = await this.GsheetOperation.getLastRow(this.spreadsheetId, "Outbound!A:A")
             // startRow = lastRow + 1
             const startRow = lastRow + 1;
             // setvalues to the range
             await this.GsheetOperation.setRangeValues(this.spreadsheetId, `Outbound!A${startRow}`, dataToSet)
+            // set last time pushed
+            const lastTime = new Date(message.data[message.data.length - 1].jamMuat).getTime();
+            await this.setSpreadsheetValueLastTimePushed(lastTime);
+            // set that we're finished progress
+            await this.setSpreadsheetThatWeAreInProgress(0);
+            this.sendMessageToSidePanel("Data berhasil dimasukkan!")
         } catch (error) {
             this.sendMessageToSidePanel("Gagal insert data produk keluar: " + error.message)
         }
