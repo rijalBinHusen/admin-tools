@@ -80,7 +80,7 @@ export class GoodsIssue {
     async insertData(message: messageCrossScript) {
         if(message.action !== 'ctb-goods-issue') return;
         if(!this.isGoogleAPIReady) await this.setUpGoogleAPI();
-        this.sendMessageToSidePanel("Memasukkan data kedalam spreadsheet")
+        this.sendMessageToSidePanel("Memasukkan data kedalam spreadsheet");
         try {
             
             // get last record time pushed
@@ -109,7 +109,7 @@ export class GoodsIssue {
             await this.setSpreadsheetValueLastTimePushed(lastTime);
             // set that we're finished progress
             await this.setSpreadsheetThatWeAreInProgress(0);
-            this.sendMessageToSidePanel("Data berhasil dimasukkan!")
+            this.sendMessageToSidePanel( dataToSet.length + " data berhasil dimasukkan!")
         } catch (error) {
             this.sendMessageToSidePanel("Gagal insert data produk keluar: " + error.message)
         }

@@ -56,7 +56,12 @@ export class GoodsIsueContent {
      */
 
     async getOutputData(): Promise<void> {
-        this.sendResponse("Mendapatkan data output")
+        const isURLValid = window.location.host == '192.168.8.7:8080' || window.location.host == '182.16.186.138:8080'
+        if (!isURLValid) {
+            this.sendResponse("Anda tidak berada diaplikasi STT");
+            return;
+        }
+        this.sendResponse("Mendapatkan data output");
         const d = this.getDate();
         try {
             const data = await this.getAndSortData(d.dateStart, d.dateEnd);
