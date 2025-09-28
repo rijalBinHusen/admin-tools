@@ -22,14 +22,18 @@ export class GoodsIssue {
     
     private async setUpGoogleAPI () {
         if(this.isGoogleAPIReady) return;
-        const token = await getAuthToken(true);
-        this.GsheetOperation = new GoogleSpreadsheet(token)
-        this.isGoogleAPIReady = true;
+        try {
+            const token = await getAuthToken(true);
+            this.GsheetOperation = new GoogleSpreadsheet(token)
+            this.isGoogleAPIReady = true;
+        } catch (error) {
+            throw error
+        }
     }
 
     private async getCheckerBeforeUpdate(): Promise<Checker|void> {
-        if(!this.isGoogleAPIReady) await this.setUpGoogleAPI();
         try {
+            if(!this.isGoogleAPIReady) await this.setUpGoogleAPI();
             const range = "Lock!A2:B2";
             const data = await this.GsheetOperation.getValuesOnSpreadsheet(
                 this.spreadsheetId,
@@ -48,9 +52,9 @@ export class GoodsIssue {
     }
     
     private async setSpreadsheetThatWeAreInProgress(progress: 0|1) {
-        if(!this.isGoogleAPIReady) await this.setUpGoogleAPI();
         try {
             
+            if(!this.isGoogleAPIReady) await this.setUpGoogleAPI();
             const range = "Lock!B2";
             await this.GsheetOperation.setRangeValues(
                 this.spreadsheetId,
@@ -63,8 +67,8 @@ export class GoodsIssue {
     }
 
     private async setSpreadsheetValueLastTimePushed(time: number) {
-        if(!this.isGoogleAPIReady) await this.setUpGoogleAPI();
         try {
+            if(!this.isGoogleAPIReady) await this.setUpGoogleAPI();
             
             const range = "Lock!A2";
             await this.GsheetOperation.setRangeValues(
@@ -79,9 +83,9 @@ export class GoodsIssue {
 
     async insertData(message: messageCrossScript) {
         if(message.action !== 'ctb-goods-issue') return;
-        if(!this.isGoogleAPIReady) await this.setUpGoogleAPI();
         this.sendMessageToSidePanel("Memasukkan data kedalam spreadsheet");
         try {
+            if(!this.isGoogleAPIReady) await this.setUpGoogleAPI();
             
             // get last record time pushed
             const lastUpdate = await this.getCheckerBeforeUpdate();
