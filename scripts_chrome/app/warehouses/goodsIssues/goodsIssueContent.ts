@@ -56,14 +56,12 @@ export class GoodsIsueContent {
      */
 
     async getOutputData(): Promise<void> {
-        const isURLValid = window.location.host == '192.168.8.7:8080' || window.location.host == '182.16.186.138:8080'
-        if (!isURLValid) {
-            this.sendResponse("Anda tidak berada diaplikasi STT");
-            return;
-        }
         this.sendResponse("Mendapatkan data output");
         const d = this.getDate();
         try {
+            const isURLValid = window.location.host == '192.168.8.7:8080' || window.location.host == '182.16.186.138:8080'
+            if (!isURLValid) throw new Error("Anda tidak berada diaplikasi STT");
+
             const data = await this.getAndSortData(d.dateStart, d.dateEnd);
             if(typeof data === 'string') throw new Error(data)
             
@@ -104,20 +102,33 @@ export class GoodsIsueContent {
     }
 
     private getDate() {
-        const currentDate = new Date();
+        let currentDate = new Date();
+        const getDatOnStorage = this.getOrSetDateToLocalStorage("GET")
+        if(getDatOnStorage) {
+            currentDate = new Date(getDatOnStorage);
+        }
         const currentHour = currentDate.getHours();
-        // is no need to fetch
-        // if clock < 11 make date as yesterday, else today
+        // if clock < 7 make date as yesterday, else today
         if (currentHour < 7) currentDate.setDate(currentDate.getDate() - 1);
         // else do nothing
 
-        // ================================ normal date
+        // ================================ normal date ================================
         const date = new Date();
+        this.getOrSetDateToLocalStorage("SET", date.toString())
         return {
             dateStart: `${currentDate.getFullYear()}-${currentDate.getMonth() +1}-${currentDate.getDate()}`,
             dateEnd: `${date.getFullYear()}-${date.getMonth() +1}-${date.getDate()}`
         }
 
+    }
+
+    private getOrSetDateToLocalStorage(method: "GET"|"SET", data?: string): string|void|null {
+        const storageName = "goodsIssueLastDate";
+        if(method === 'SET' && data) {
+            window.localStorage.setItem(storageName, data)
+        }
+
+        return window.localStorage.getItem(storageName)
     }
 
     private convertToDateAndShift(d: Date) {

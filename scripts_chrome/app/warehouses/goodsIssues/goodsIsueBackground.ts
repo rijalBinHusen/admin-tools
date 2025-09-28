@@ -111,6 +111,7 @@ export class GoodsIssue {
             await this.setSpreadsheetThatWeAreInProgress(0);
             this.sendMessageToSidePanel( dataToSet.length + " data berhasil dimasukkan!")
         } catch (error) {
+            await this.setSpreadsheetThatWeAreInProgress(0);
             this.sendMessageToSidePanel("Gagal insert data produk keluar: " + error.message)
         }
     }
