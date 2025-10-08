@@ -1,7 +1,19 @@
+import { type SendActionToBackground, messageCrossScript} from "../../../scripts_chrome.types";
 
-
-class UpahBoronganApprove {
+export class UpahBoronganApprove {
   
+  private writeResponse: SendActionToBackground;
+
+  constructor(funcToSendActionToBackground: SendActionToBackground) {
+      this.writeResponse = funcToSendActionToBackground;
+  }
+  
+  private sendResponse(message: string) {
+    const currentTime = new Date();
+    const messageToSend = `${currentTime.toLocaleTimeString()} | ${message}`
+    this.writeResponse({ action: "ctb-upah-bl", message: messageToSend });
+  }
+
   private async loginToApp(name: string, password: string): Promise<boolean> {
     try {
       const url = '/warehouse/auth/login';
@@ -138,11 +150,19 @@ class UpahBoronganApprove {
     }
   }
 
-  async startApproveUpah(param: parameterToApproveUpah) {
+  async startApproveUpah(parameter: messageCrossScript) {
+    if(parameter.action !== 'btc-approve-upah-bl') return;
+        
+    // check is current tab === /finger/index.php/login // http://182.16.186.138:8080/
+    const isURLValid = window.location.host == '192.168.8.7:8080' || window.location.host == '182.16.186.138:8080'
+    if (!isURLValid) {
+        this.sendResponse("Anda tidak berada diaplikasi warehouse");
+        return;
+    }
     
     try {
         let peopleApprove = <2|1> 1;
-        for(let user of param.users) {
+        for(let user of parameter.data.users) {
           if(peopleApprove > 2) return;
           // logout
           await this.logOut();
@@ -153,7 +173,7 @@ class UpahBoronganApprove {
           const isUsernameMatched = await this.checkUsername(user.username);
           if(!isUsernameMatched) return;
           // get list to approve
-          const listToApprove = await this.getListToApprove(param.dateStart, param.dateEnd, peopleApprove);
+          const listToApprove = await this.getListToApprove(parameter.data.dateStart, parameter.data.dateEnd, peopleApprove);
           // approve
           for(let approveId of listToApprove) {
             await this.approveRecord(peopleApprove, approveId)
@@ -162,15 +182,9 @@ class UpahBoronganApprove {
           peopleApprove += 1
         }
     } catch (error) {
-        
+        this.sendResponse(error.message)
     }
   }
-}
-
-interface parameterToApproveUpah {
-    users: { username: string, password: string, displayName: string}[]
-    dateStart: string,
-    dateEnd: string
 }
 
 interface GetListToApproveResponse {

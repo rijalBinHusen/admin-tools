@@ -1,4 +1,4 @@
-import { type SendActionToBackground, messageCrossScript} from "../../scripts_chrome.types";
+import { type SendActionToBackground, messageCrossScript} from "../../../scripts_chrome.types";
 
 export class UpahBorongan {
     private warehouses = [1,2,3,4,5,6,7];

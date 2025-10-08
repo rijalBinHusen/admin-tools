@@ -26,6 +26,7 @@ export type messageCrossScript = BTSAction
                                     |EndResponse
                                     |CTBGoodsIssue
                                     |STBActionOnly
+                                    |STBApproveUpahBL
 
 export interface absenParameterFunction {
     date: string
@@ -43,7 +44,7 @@ interface STBActionAbsen {
     data: absenParameterFunction
 }
 
-export type modeUpah = 'check'|'generate';
+export type modeUpah = 'check'|'generate'|'approve';
 
 interface STBActionParameterPeriodStartEnd {
     action: 'stb-upah-bl',
@@ -94,7 +95,6 @@ interface STBActionOnly {
     action: 'stb-goods-issue'|'btc-goods-issue'
 }
 
-
 export interface GoodsIssueResult {
     date: string,
     shift: number,
@@ -103,4 +103,15 @@ export interface GoodsIssueResult {
     expiredDate: string
     jamMuat: string
     qty: number
+}
+
+interface STBApproveUpahBL {
+    action: 'stb-approve-upah-bl' | 'btc-approve-upah-bl',
+    data: parameterToApproveUpahBL
+}
+
+interface parameterToApproveUpahBL {
+    users: { username: string, password: string, displayName: string}[]
+    dateStart: string,
+    dateEnd: string
 }

@@ -7,13 +7,27 @@
     const mode = ref<modeUpah>('check')
 
     function handleSubmit() {
-        // @ts-ignore
-        chrome.runtime.sendMessage(<messageCrossScript>{ action: 'stb-upah-bl', data: {
+
+        let paramToSend = <messageCrossScript>{ action: 'stb-upah-bl', data: {
             dateEnd: dateEnd.value,
             dateStart: dateStart.value,
             mode: mode.value
             },
-        });
+        }
+        
+        if(mode.value == 'approve') {
+            paramToSend = <messageCrossScript>{ action: 'stb-approve-upah-bl', data: {
+                dateEnd: dateEnd.value,
+                dateStart: dateStart.value,
+                users: [
+                    { displayName: "Lesmana Permadi", password: "123", username: "permadi" },
+                    { displayName: "Rori Maulidi", password: "123", username: "rori" },
+                  ]
+                },
+            }
+        }
+        // @ts-ignore
+        chrome.runtime.sendMessage(paramToSend);
     }
 </script>
 
@@ -35,6 +49,9 @@
             
             <input v-model="mode" type="radio" name="mode" id="generate" value="generate"></input>
             <label for="generate">Generate</label>
+
+            <input v-model="mode" type="radio" name="mode" id="approve" value="approve"></input>
+            <label for="generate">Approve</label>
         </div>
         <div>
             <input class="btn btn-b btn-sm smooth" type="submit" name="submit" id="submit" @click="handleSubmit">
