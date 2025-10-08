@@ -1,6 +1,15 @@
 export function detectWorkingAndOverHours(date: Date, departemenId: number, workingHours: number, checkIn: string, checkOut: string) {
             let restHour = 1;
 
+            if(!checkIn && !checkOut) {
+                return {
+                    stdHour: "",
+                    restHour: "",
+                    overTime: "",
+                    workingHours: 0,
+                }
+            }
+
             const isFriday = date.getDay() == 5;
             const isSaturday = date.getDay() == 6;
             const isOutsourceLabor = departemenId != 392;
