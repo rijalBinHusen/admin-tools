@@ -1,5 +1,5 @@
-import { downloadAsFile, toSpreadsheetDate, getTableDataAsArray } from "../utils/tools";
-import { type SendActionToBackground, messageCrossScript } from "../scripts_chrome.types";
+import { downloadAsFile, toSpreadsheetDate, getTableDataAsArray } from "../../utils/tools";
+import { type SendActionToBackground, messageCrossScript } from "../../scripts_chrome.types";
 import { detectWorkingAndOverHours } from "./absenFunction"
 
 export class Absen {

@@ -1,5 +1,5 @@
 import { type messageCrossScript } from "./scripts_chrome.types";
-import { Absen } from "./app/absen";
+import { Absen } from "./app/absen/absen";
 import { UpahBorongan } from "./app/warehouses/upahBorongan/checkAndGenerate";
 import { Antrian2ContentJS } from "./app/antrian2/antrian2Content";
 import { GoodsIsueContent } from "./app/warehouses/goodsIssues/goodsIssueContent"
