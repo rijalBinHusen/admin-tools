@@ -6,17 +6,15 @@
     const dateEnd = ref('');
     const mode = ref<modeUpah>('check')
 
-    function handleSubmit() {
+    function sendMessageToChrome (param: messageCrossScript) {
+        // @ts-ignore
+        chrome.runtime.sendMessage(param);
+    }
 
-        let paramToSend = <messageCrossScript>{ action: 'stb-upah-bl', data: {
-            dateEnd: dateEnd.value,
-            dateStart: dateStart.value,
-            mode: mode.value
-            },
-        }
+    function handleSubmit() {
         
         if(mode.value == 'approve') {
-            paramToSend = <messageCrossScript>{ action: 'stb-approve-upah-bl', data: {
+            sendMessageToChrome({ action: 'stb-approve-upah-bl', data: {
                 dateEnd: dateEnd.value,
                 dateStart: dateStart.value,
                 users: [
@@ -24,10 +22,15 @@
                     { displayName: "Rori Maulidi", password: "123", username: "rori" },
                   ]
                 },
-            }
+            })
+        } else {
+            sendMessageToChrome({ action: 'stb-upah-bl', data: {
+                dateEnd: dateEnd.value,
+                dateStart: dateStart.value,
+                mode: mode.value
+                },
+            })
         }
-        // @ts-ignore
-        chrome.runtime.sendMessage(paramToSend);
     }
 </script>
 
