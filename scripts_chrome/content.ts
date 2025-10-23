@@ -6,6 +6,9 @@ import { GoodsIsueContent } from "./app/warehouses/goodsIssues/goodsIssueContent
 import { UpahBoronganApprove } from "./app/warehouses/upahBorongan/approve"
 
 chrome.runtime.onMessage.addListener( async (message: messageCrossScript, sender, sendResponse) => {
+  
+  
+
   switch (message.action) {
     case 'btc-absen-function':
       const abs = new Absen(sendActionToBackground);

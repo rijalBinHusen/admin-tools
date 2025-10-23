@@ -57,7 +57,7 @@ interface BTSAction {
 }
 
 interface CTBAction {
-    action: 'ctb-upah-bl' | 'ctb-absen-function' | 'send-message',
+    action: 'ctb-upah-bl' | 'ctb-absen-function' | 'send-message' | 'ctb-kpi',
     message: string
 }
 

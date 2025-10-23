@@ -1,105 +1,9 @@
-interface Kuantitatif {
-    "id_kuanti": string,
-    "id_user": string,
-    "desk": string,
-    "indikator": string,
-    "params": string,
-    "bobot": string,
-    "draft": string,
-    "active": string,
-    "edited_by": string,
-    "edited_on": string
-}
-
-interface Kualitatif {
-    "id_kuali": string,
-    "id_user": string,
-    "desk": string,
-    "params": string,
-    "bobot": string,
-    "draft": string,
-    "active": string,
-    "edited_by": string,
-    "edited_on": string
-}
-
-interface Report_response {
-    "nama": string,
-    "status": {
-        "approved": null,
-        "number": null,
-        "draft": null
-    },
-    "doc": [],
-    "s_apv": {
-        "number": null,
-        "number2": null
-    },
-    "kuanti": Kuantitatif[],
-    "kuali": Kualitatif[],
-    "ansum1": "",
-    "ansum2": ""
-}
-
-interface Users_and_details {
-    name: string,
-    username: string,
-    password: string,
-    id_user: string
-}
-
-interface pointKPI {
-    points: number,
-    KRA:  string
-    remarks: string
-}
-
-interface pointsEKPI {
-    [username: string]: {
-        kuali: pointKPI[],
-        kuanti: pointKPI[]
-    }
-
-}
-
-
-interface getRaportResponse {
-    "raport": [
-        {
-            "id_user": string
-            "id_dept": string
-            "nama": string
-            "dept": string
-            "area": string
-            "id_hierarki": string
-            "child": string
-            "parent": string
-            "direct": string
-            "id_raport": null,
-            "tgl_awal": null,
-            "tgl_akhir": null
-        }
-    ],
-    "periode": {
-        "id_periode": string
-        "nama": string
-        "tgl_awal": string
-        "tgl_akhir": string
-        "edited_by": string
-        "edited_on": string
-    }
-}
-
-interface localStorageData {
-    startDate: string
-    endDate: string
-    spreadsheetId: string
-    userIdEntried: number[]
-}
-
+import { type SendActionToBackground, messageCrossScript} from "../../scripts_chrome.types";
+import { ThirdParty } from "../../utils/thirdParty"
+import config from "../../../config.json"
 export class EKPI {
 
-    private thirdParty: ThirdParty;
+    private thirdParty;
     private automationSpreadsheetId: string;
     private ekpiSpreadsheetIdRangeSetting: string;
     private ekpiRangeKuantiSetting: string;
@@ -116,6 +20,10 @@ export class EKPI {
     private ekpiStartDateRange: string;
     private ekpiEndDateRange: string;
 
+    // ========================================== new code ========
+    private writeResponse: SendActionToBackground;
+
+    // ========================================== new code ========
     constructor (
         automationSpreadsheetId: string,
         ekpiSpreadsheetIdRangeSetting: string,
@@ -123,7 +31,8 @@ export class EKPI {
         ekpiRangeKualiSetting: string,
         ekpiUsersRangeSetting: string,
         ekpiStartDateRange: string,
-        ekpiEndDateRange: string
+        ekpiEndDateRange: string,
+        funcToSendActionToBackground: SendActionToBackground
     ) {
         this.thirdParty = new ThirdParty();
         this.automationSpreadsheetId = automationSpreadsheetId;
@@ -134,7 +43,14 @@ export class EKPI {
         this.ekpiStartDateRange = ekpiStartDateRange;
         this.ekpiEndDateRange = ekpiEndDateRange;
         this.localStorageName = "ekpiEntried";
-        this.getDataFromLocalStorage();
+        this.writeResponse = funcToSendActionToBackground;
+    }
+
+    private sendResponse(message: string, data?: string) {
+        const currentTime = new Date();
+        const messageToSend = `${currentTime.toLocaleTimeString()} | ${message}`
+        this.writeResponse({ action: "ctb-kpi", message: messageToSend });
+        // console.log(message, data)
     }
 
     async login(username: string, password: string): Promise<boolean> {
@@ -449,34 +365,23 @@ export class EKPI {
         return isReportExists;
     }
     
-    async startEntry(periode1: string, periode2: string) {
+    async startEntry(periode1: string, periode2: string): Promise<string|true> {
         const users = await this.getUsersEKPI();
-        if(!users) {
-            console.log("Gagal mendapatkan users");
-            return;
-        }
+        if(!users) return "Gagal mendapatkan users";
 
-        if(periode1 == "" || periode2 == "") {
-            console.log("Periode report tidak boleh kosong");
-        }
+        if(periode1 == "" || periode2 == "") return "Periode report tidak boleh kosong";
 
         const pointsKPI = await this.getPointEKPI();
-        if(!pointsKPI) {
-            console.log(`Gagal melakukan input E-KPI karena semua point E-KPI tidak ditemukan`);
-            return
-        }
-
-        else {
-            console.log("Berhasil mendapatkan point ekpi: ",pointsKPI)
-        }
+        if(!pointsKPI) return `Gagal melakukan input E-KPI karena semua point E-KPI tidak ditemukan`;
+        // else {
+        //     this.sendResponse("Berhasil mendapatkan point ekpi: ",pointsKPI)
+        // }
         
         let counter = 0;
         for(let user of users) {
             if(!user.id_user || !user.name || !user.password || !user.username) continue;
-            const isUserEntried = this.addUserIdEntried(Number(user.id_user));
-            if(isUserEntried) continue;
             
-            console.log(`Melakukan input raport ${user.name}, data ke ${counter++} dari ${users.length}`);
+            this.sendResponse(`Melakukan input raport ${user.name}, data ke ${counter++} dari ${users.length}`);
             
             this.timeWaiting += 1000;
             await new Promise(resolve => setTimeout(resolve, this.timeWaiting));
@@ -485,7 +390,7 @@ export class EKPI {
             // login
             const isLoginSuccess = await this.login(user.username, user.password);
             if(!isLoginSuccess) {
-                console.log(`Gagal login ${user.name}`);
+                this.sendResponse(`Gagal login ${user.name}`);
                 continue;
             }
             
@@ -498,34 +403,39 @@ export class EKPI {
                 
                 pointKuanti = pointsKPI[user.name].kuanti;
                 pointKuali = pointsKPI[user.name].kuali;
-                console.log(`Input E-KPI ${user.name} Sesuai dengan point yang ada`);
+                this.sendResponse(`Input E-KPI ${user.name} Sesuai dengan point yang ada`);
             }
             
             else {
                 
-                console.log(`Input E-KPI ${user.name} all point as 100`);
+                this.sendResponse(`Input E-KPI ${user.name} all point as 100`);
             }
 
             const isReportEntried = await this.checkIsRaportEntriedOrNot(periode1, periode2);
 
             if(isReportEntried) {
 
-                console.log(`Report sudah di entry. Gagal melakukan input E-KPI ${user.name}`);
+                this.sendResponse(`Report sudah di entry. Gagal melakukan input E-KPI ${user.name}`);
             }
             else {
                 await this.insert_kpi(user.id_user, periode1, periode2, pointKuanti, pointKuali);
-                await this.thirdParty.notifyToTelegramAdmin(
-                    `Raport ${user.name} berhasil diinput, periode ${periode1} - ${periode2}`
-                )
             }
             // logout
             await this.logout();
         }
-        console.log("Proses input selesai!")
+        return true
     }
 
     async runEKPIEntrier() {
-        // this.waitAndReRun();
+        
+        
+        // check is current tab === /finger/index.php/login // http://182.16.186.138:8080/
+        const isURLValid = window.location.host == '192.168.8.7:8080' || window.location.host == '182.16.186.138:8080'
+        if (!isURLValid) {
+            this.sendResponse("Anda tidak berada diaplikasi STT");
+            return;
+        }
+        this.sendResponse("Anda berada diaplikasi STT")
         
         const startDateData = await this.thirdParty.getSpreadsheetValue(
             this.automationSpreadsheetId,
@@ -540,16 +450,15 @@ export class EKPI {
         const periodeDateStart = startDateData.values[0][0];
         const periodeDateEnd = endDateData.values[0][0];
 
-        const isPeriodeStartSame = this.localStorageData.startDate === periodeDateStart;
-        const isPeriodeEndSame = this.localStorageData.endDate === periodeDateEnd;
-
-        if(!isPeriodeEndSame && !isPeriodeStartSame) {
-            this.localStorageData.userIdEntried = [];
-        }
-
-        console.log("Periode start: ", periodeDateStart, " Periode end: ", periodeDateEnd);
+        const message = `Melakukan input ${periodeDateStart} - ${periodeDateEnd}`
+        this.sendResponse(message)
         
-        this.startEntry(periodeDateStart, periodeDateEnd);
+        const isSuccess = await this.startEntry(periodeDateStart, periodeDateEnd);
+        if(isSuccess === true) {
+            this.sendResponse("Selesai input eKPI")
+        } else {
+            this.sendResponse(isSuccess)
+        }
     }
 
     async waitAndReRun() {
@@ -566,18 +475,6 @@ export class EKPI {
             setTimeout(() => resolve(""), timeWaiting)
         })
         this.runEKPIEntrier();
-    }
-
-    addUserIdEntried(userId: number): boolean {
-
-        let isUserEntried = this.localStorageData.userIdEntried.includes(Number(userId));
-
-        if(!isUserEntried) {
-            this.localStorageData.userIdEntried.push(userId);
-            this.setDataToLocalStorage();
-        }
-        
-        return isUserEntried;
     }
 
     setDataToLocalStorage() {
@@ -631,4 +528,103 @@ export class EKPI {
             }
         }
     }
+}
+
+interface Kuantitatif {
+    "id_kuanti": string,
+    "id_user": string,
+    "desk": string,
+    "indikator": string,
+    "params": string,
+    "bobot": string,
+    "draft": string,
+    "active": string,
+    "edited_by": string,
+    "edited_on": string
+}
+
+interface Kualitatif {
+    "id_kuali": string,
+    "id_user": string,
+    "desk": string,
+    "params": string,
+    "bobot": string,
+    "draft": string,
+    "active": string,
+    "edited_by": string,
+    "edited_on": string
+}
+
+interface Report_response {
+    "nama": string,
+    "status": {
+        "approved": null,
+        "number": null,
+        "draft": null
+    },
+    "doc": [],
+    "s_apv": {
+        "number": null,
+        "number2": null
+    },
+    "kuanti": Kuantitatif[],
+    "kuali": Kualitatif[],
+    "ansum1": "",
+    "ansum2": ""
+}
+
+interface Users_and_details {
+    name: string,
+    username: string,
+    password: string,
+    id_user: string
+}
+
+interface pointKPI {
+    points: number,
+    KRA:  string
+    remarks: string
+}
+
+interface pointsEKPI {
+    [username: string]: {
+        kuali: pointKPI[],
+        kuanti: pointKPI[]
+    }
+
+}
+
+
+interface getRaportResponse {
+    "raport": [
+        {
+            "id_user": string
+            "id_dept": string
+            "nama": string
+            "dept": string
+            "area": string
+            "id_hierarki": string
+            "child": string
+            "parent": string
+            "direct": string
+            "id_raport": null,
+            "tgl_awal": null,
+            "tgl_akhir": null
+        }
+    ],
+    "periode": {
+        "id_periode": string
+        "nama": string
+        "tgl_awal": string
+        "tgl_akhir": string
+        "edited_by": string
+        "edited_on": string
+    }
+}
+
+interface localStorageData {
+    startDate: string
+    endDate: string
+    spreadsheetId: string
+    userIdEntried: number[]
 }
