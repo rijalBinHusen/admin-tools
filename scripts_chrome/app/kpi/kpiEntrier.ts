@@ -25,24 +25,16 @@ export class EKPI {
 
     // ========================================== new code ========
     constructor (
-        automationSpreadsheetId: string,
-        ekpiSpreadsheetIdRangeSetting: string,
-        ekpiRangeKuantiSetting: string,
-        ekpiRangeKualiSetting: string,
-        ekpiUsersRangeSetting: string,
-        ekpiStartDateRange: string,
-        ekpiEndDateRange: string,
         funcToSendActionToBackground: SendActionToBackground
     ) {
         this.thirdParty = new ThirdParty();
-        this.automationSpreadsheetId = automationSpreadsheetId;
-        this.ekpiSpreadsheetIdRangeSetting = ekpiSpreadsheetIdRangeSetting;
-        this.ekpiRangeKuantiSetting = ekpiRangeKuantiSetting;
-        this.ekpiRangeKualiSetting = ekpiRangeKualiSetting;
-        this.ekpiUsersRangeSetting = ekpiUsersRangeSetting;
-        this.ekpiStartDateRange = ekpiStartDateRange;
-        this.ekpiEndDateRange = ekpiEndDateRange;
-        this.localStorageName = "ekpiEntried";
+        this.automationSpreadsheetId = config.automation_spreadsheet.spreadsheetId;
+        this.ekpiSpreadsheetIdRangeSetting = config.automation_spreadsheet.ekpi.ekpi_source_range;
+        this.ekpiRangeKuantiSetting = config.automation_spreadsheet.ekpi.kuantitatif_range_setting;
+        this.ekpiRangeKualiSetting = config.automation_spreadsheet.ekpi.kualitatif_range_setting;
+        this.ekpiUsersRangeSetting = config.automation_spreadsheet.ekpi.username_password_range;
+        this.ekpiStartDateRange = config.automation_spreadsheet.ekpi.start_date_to_entry;
+        this.ekpiEndDateRange = config.automation_spreadsheet.ekpi.end_date_to_entry;
         this.writeResponse = funcToSendActionToBackground;
     }
 
@@ -53,7 +45,7 @@ export class EKPI {
         // console.log(message, data)
     }
 
-    async login(username: string, password: string): Promise<boolean> {
+    private async login(username: string, password: string): Promise<boolean> {
 
         const login = await fetch(location.origin + "/KPI/auth/login", {
             "headers": {
@@ -74,15 +66,11 @@ export class EKPI {
             return login.url === location.origin + "/KPI/raport"
     }
 
-    async logout() {
+    private async logout() {
         return fetch(location.origin + "/KPI/auth/logout")
     }
 
-    isKPIEntried() {
-        
-    }
-
-    async insert_kpi(user_id: string, periode1: string, periode2: string, kuantitatifPoint: pointKPI[], kualitatifPoint: pointKPI[]) {
+    private async insert_kpi(user_id: string, periode1: string, periode2: string, kuantitatifPoint: pointKPI[], kualitatifPoint: pointKPI[]) {
 
         const response_report = await fetch(location.origin + `/KPI/raport/detail_raport?id=${user_id}&dept=7&raport=&tgl1=${periode1}&tgl2=${periode2}`, {
             "headers": {
@@ -177,7 +165,7 @@ export class EKPI {
         return true
     }
 
-    async getUsersEKPI(): Promise<Users_and_details[]|false> {
+    private async getUsersEKPI(): Promise<Users_and_details[]|false> {
 
         const userRange = await this.thirdParty.getSpreadsheetValue(
             this.automationSpreadsheetId,
@@ -202,7 +190,7 @@ export class EKPI {
         return false
     }
 
-    async getPointEKPI(): Promise<pointsEKPI|false> {
+    private async getPointEKPI(): Promise<pointsEKPI|false> {
         const pointAlphabet = {
             B: 100,
             C: 80,
@@ -343,7 +331,7 @@ export class EKPI {
         return pointsEKPI
     }
 
-    async checkIsRaportEntriedOrNot(tgl1: string, tgl2: string): Promise<boolean> {
+    private async checkIsRaportEntriedOrNot(tgl1: string, tgl2: string): Promise<boolean> {
 
         const getRaport = await fetch(`/KPI/raport/show_raport?tgl1=${tgl1}&tgl2=${tgl2}`, {
             "headers": {
@@ -365,7 +353,7 @@ export class EKPI {
         return isReportExists;
     }
     
-    async startEntry(periode1: string, periode2: string): Promise<string|true> {
+    private async startEntry(periode1: string, periode2: string): Promise<string|true> {
         const users = await this.getUsersEKPI();
         if(!users) return "Gagal mendapatkan users";
 
@@ -461,35 +449,7 @@ export class EKPI {
         }
     }
 
-    async waitAndReRun() {
-        const current = new Date();
-        const currentDate = current.getDate();
-
-        const nextDate = currentDate + 1;
-        const nextTimeRun = new Date(current); // Create a copy of the date to avoid modifying the original
-        nextTimeRun.setDate(nextDate); // Set to the next hour, 0 minutes, 0 seconds, 0 milliseconds
-        nextTimeRun.setHours(12, 3, 0, 0); // Set to the next hour, 0 minutes, 0 seconds, 0 milliseconds
-
-        const timeWaiting = nextTimeRun.getTime() - current.getTime();
-        await new Promise((resolve) => {
-            setTimeout(() => resolve(""), timeWaiting)
-        })
-        this.runEKPIEntrier();
-    }
-
-    setDataToLocalStorage() {
-        window.localStorage.setItem(
-            this.localStorageName,
-            JSON.stringify(this.localStorageData)
-        )
-    }
-
-    getDataFromLocalStorage() {
-        const getData = window.localStorage.getItem(this.localStorageName);
-        if(getData) this.localStorageData = JSON.parse(getData);
-    }
-
-    generateAllPointas100(username: string): pointsEKPI {
+    private generateAllPointas100(username: string): pointsEKPI {
         return {
             [username]: {
                 kuali: [

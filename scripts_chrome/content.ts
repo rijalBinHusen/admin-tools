@@ -4,11 +4,10 @@ import { UpahBorongan } from "./app/warehouses/upahBorongan/checkAndGenerate";
 import { Antrian2ContentJS } from "./app/antrian2/antrian2Content";
 import { GoodsIsueContent } from "./app/warehouses/goodsIssues/goodsIssueContent"
 import { UpahBoronganApprove } from "./app/warehouses/upahBorongan/approve"
+import { EKPI } from "./app/kpi/kpiEntrier";
 
 chrome.runtime.onMessage.addListener( async (message: messageCrossScript, sender, sendResponse) => {
   
-  
-
   switch (message.action) {
     case 'btc-absen-function':
       const abs = new Absen(sendActionToBackground);
@@ -18,17 +17,21 @@ chrome.runtime.onMessage.addListener( async (message: messageCrossScript, sender
       const upahBL = new UpahBorongan(sendActionToBackground);
       upahBL.runUpahFunction(message);
       break;
+    case 'btc-kpi':
+      const i = new EKPI(sendActionToBackground)
+      i.runEKPIEntrier()
+      break;
     case 'btc-approve-upah-bl':
       const h = new UpahBoronganApprove(sendActionToBackground)
       h.startApproveUpah(message)
       break;
-    case 'btc-antrian2-function':
-      const antrian2 = new Antrian2ContentJS(sendActionToBackground);
-      antrian2.doGetData(message);
-      break;
     case 'btc-goods-issue':
       const g = new GoodsIsueContent(sendActionToBackground);
       g.getOutputData();
+      break;
+    case 'btc-antrian2-function':
+      const antrian2 = new Antrian2ContentJS(sendActionToBackground);
+      antrian2.doGetData(message);
       break;
     default:
       break;
