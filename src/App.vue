@@ -8,6 +8,7 @@ import Stock from './pages/Stock.vue';
 import UpahBL from './pages/UpahBL.vue';
 import Antrian2 from './pages/Antrian2.vue';
 import AdminSC from './pages/AdminSC.vue';
+import KPI from './pages/KPI.vue';
 
 const pages = {
   absen: markRaw(Absen),
@@ -15,11 +16,12 @@ const pages = {
   upahBL: markRaw(UpahBL),
   antrian2: markRaw(Antrian2),
   adminSC: markRaw(AdminSC),
+  kpi: markRaw(KPI),
 }
 type PageOption = keyof typeof pages;
 const currentPage = ref<PageOption>('adminSC')
 
-const menu = ['Stock Control', 'Absen', 'Upah borongan', 'Antrian report', 'Stock'] as const;
+const menu = ['Absen', 'Upah borongan', 'kpi', 'Antrian report', 'Stock Control', 'Stock'] as const;
 type MenuOption = typeof menu[number];
 
 function handleChangePages (page: MenuOption) {
@@ -38,6 +40,9 @@ function handleChangePages (page: MenuOption) {
       break;
     case 'Stock Control':
       currentPage.value = 'adminSC';
+      break;
+    case 'kpi':
+      currentPage.value = 'kpi';
       break;
     default:
       break;

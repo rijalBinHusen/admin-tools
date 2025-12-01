@@ -57,7 +57,7 @@ interface BTSAction {
 }
 
 interface CTBAction {
-    action: 'ctb-upah-bl' | 'ctb-absen-function' | 'send-message',
+    action: 'ctb-upah-bl' | 'ctb-absen-function' | 'send-message' | 'ctb-kpi',
     message: string
 }
 
@@ -92,7 +92,7 @@ interface CTBGoodsIssue {
 }
 
 interface STBActionOnly {
-    action: 'stb-goods-issue'|'btc-goods-issue'
+    action: 'stb-goods-issue'|'btc-goods-issue'|'stb-kpi'|'btc-kpi'
 }
 
 export interface GoodsIssueResult {
