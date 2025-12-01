@@ -28,9 +28,9 @@ export function detectWorkingAndOverHours(date: Date, departemenId: number, work
                 const riilMenitIn = Number(checkIn.substring(3, 5));
                 let jamIn = riilJamIn;
                 let jamOut = riilJamOut;
-                // Jam masuk, if menit != 00 ? jam + 1 : jam tetap samain
+                // Jam masuk, if menit != 0 ? jam + 1 : jam tetap samain (Karena jika 06.58, jam kerja dihitung dari 7)
                 if(riilMenitIn != 0) jamIn = riilJamIn + 1;
-                // if jam in > out ? jam out + 24
+                // if jam in > out ? jam out + 24 (Masuk malam, masuk 19 pulang 7)
                 if(jamIn > riilJamOut) jamOut = riilJamOut + 24;
                 // jam out - jam in
                 setStdHour = jamOut - jamIn;
