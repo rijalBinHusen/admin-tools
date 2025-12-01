@@ -12,8 +12,7 @@ const manifest = {
     "sidePanel",
     "scripting",
     "tabs",
-    "identity",
-    "https://www.googleapis.com/"
+    "identity"
   ],
   "oauth2": {
     "client_id": env.VITE_CLIENT_GOOGLE_ID || "",

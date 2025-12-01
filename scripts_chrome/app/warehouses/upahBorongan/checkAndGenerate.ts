@@ -1,7 +1,7 @@
 import { type SendActionToBackground, messageCrossScript} from "../../../scripts_chrome.types";
 
 export class UpahBorongan {
-    private warehouses = [1,2,3,4,5,6,7];
+    private warehouses = [1,2,3,4,5,6,12,13];
     private errorsChecker = <string[]>[];
 
     private writeResponse: SendActionToBackground;

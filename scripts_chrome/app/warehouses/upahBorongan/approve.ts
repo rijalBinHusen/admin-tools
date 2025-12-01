@@ -33,11 +33,6 @@ export class UpahBoronganApprove {
         throw new Error(`Login failed with status: ${response.status}`);
       }
 
-      const cookies = response.headers.get('Set-Cookie');
-      if (!cookies) {
-        throw new Error('No Set-Cookie header found in the response.');
-      }
-
       return true;
     } catch (error) {
       console.error('Error during login:', error);
