@@ -91,7 +91,7 @@ export class Absen {
                 }
 
                 const peopleName = row[2].replace(",", ". ");
-                result.push([toSpreadsheetDate(new Date(dateParameter)), Number(row[1]), peopleName, row[3], row[6], row[7], detectHour.restHour, detectHour.overTime, detectHour.stdHour].join(","))
+                result.push([dateParameter, Number(row[1]), peopleName, row[3], row[6], row[7], detectHour.restHour, detectHour.overTime, detectHour.stdHour].join(","))
             }
         }
         return result.join("\n");
