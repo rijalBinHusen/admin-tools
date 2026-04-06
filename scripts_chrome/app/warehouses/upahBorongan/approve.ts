@@ -177,7 +177,7 @@ export class UpahBoronganApprove {
           peopleApprove += 1
         }
     } catch (error) {
-        this.sendResponse(error.message)
+        this.sendResponse(JSON.stringify(error))
     }
   }
 }
